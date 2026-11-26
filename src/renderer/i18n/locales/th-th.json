@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "บันทึก runtime ไม่ได้ โปรดตรวจสอบพื้นที่ดิสก์และสิทธิ์การเข้าถึงแล้วลองอีกครั้ง",
   "agent.runtime_download.errors.unsupported": "{{runtime}} ไม่รองรับบนแพลตฟอร์มนี้",
   "agent.runtime_download.installing": "กำลังตรวจสอบและติดตั้ง runtime…",
+  "agent.runtime_download.missing": "ยังไม่ได้ติดตั้งรันไทม์ โปรดดาวน์โหลดจากรีจิสทรี npm เพื่อใช้เอเจนต์นี้",
   "agent.runtime_download.preparing": "กำลังตรวจสอบ runtime ที่จำเป็น…",
   "agent.runtime_download.title": "กำลังเตรียม {{runtime}}",
   "agent.session.add.title": "เพิ่มเซสชัน",

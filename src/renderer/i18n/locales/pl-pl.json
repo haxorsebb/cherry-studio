@@ -355,6 +355,7 @@
   "agent.runtime_download.errors.storage": "Nie można zapisać środowiska wykonawczego. Sprawdź ilość miejsca na dysku oraz uprawnienia, a następnie spróbuj ponownie.",
   "agent.runtime_download.errors.unsupported": "Środowisko {{runtime}} nie jest obsługiwane na tej platformie.",
   "agent.runtime_download.installing": "Weryfikowanie i instalowanie środowiska wykonawczego…",
+  "agent.runtime_download.missing": "Środowisko uruchomieniowe nie jest zainstalowane. Pobierz je z rejestru npm, aby używać tego agenta.",
   "agent.runtime_download.preparing": "Sprawdzanie wymaganego środowiska wykonawczego…",
   "agent.runtime_download.title": "Przygotowywanie {{runtime}}",
   "agent.session.add.title": "Dodaj sesję",

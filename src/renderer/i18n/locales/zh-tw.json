@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "無法儲存執行環境，請檢查磁碟空間和權限後重試。",
   "agent.runtime_download.errors.unsupported": "此平台不支援 {{runtime}}。",
   "agent.runtime_download.installing": "正在驗證並安裝執行環境…",
+  "agent.runtime_download.missing": "尚未安裝執行階段。請從 npm 登錄庫下載後再使用此代理。",
   "agent.runtime_download.preparing": "正在檢查所需執行環境…",
   "agent.runtime_download.title": "正在準備 {{runtime}}",
   "agent.session.add.title": "新增工作階段",

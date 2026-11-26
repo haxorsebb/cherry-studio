@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Běhové prostředí nelze uložit. Zkontrolujte volné místo na disku a oprávnění a zkuste to znovu.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} není na této platformě podporováno.",
   "agent.runtime_download.installing": "Ověřování a instalace běhového prostředí…",
+  "agent.runtime_download.missing": "Běhové prostředí není nainstalováno. Chcete-li tohoto agenta používat, stáhněte je z registru npm.",
   "agent.runtime_download.preparing": "Kontrola požadovaného běhového prostředí…",
   "agent.runtime_download.title": "Příprava {{runtime}}",
   "agent.session.add.title": "Přidat relaci",

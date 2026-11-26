@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Mediul nu poate fi salvat. Verificați spațiul pe disc și permisiunile, apoi încercați din nou.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} nu este acceptat pe această platformă.",
   "agent.runtime_download.installing": "Se verifică și se instalează mediul…",
+  "agent.runtime_download.missing": "Mediul de execuție nu este instalat. Descărcați-l din registrul npm pentru a folosi acest agent.",
   "agent.runtime_download.preparing": "Se verifică mediul necesar…",
   "agent.runtime_download.title": "Se pregătește {{runtime}}",
   "agent.session.add.title": "Adaugă o sesiune",

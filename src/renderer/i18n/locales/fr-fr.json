@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Impossible d’enregistrer l’environnement. Vérifiez l’espace disque et les autorisations, puis réessayez.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} n’est pas pris en charge sur cette plateforme.",
   "agent.runtime_download.installing": "Vérification et installation de l’environnement…",
+  "agent.runtime_download.missing": "L'environnement d'exécution n'est pas installé. Téléchargez-le depuis le registre npm pour utiliser cet agent.",
   "agent.runtime_download.preparing": "Vérification de l’environnement requis…",
   "agent.runtime_download.title": "Préparation de {{runtime}}",
   "agent.session.add.title": "Ajouter une session",

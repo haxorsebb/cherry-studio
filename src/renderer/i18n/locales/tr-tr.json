@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Çalışma ortamı kaydedilemiyor. Disk alanını ve izinleri kontrol edip tekrar deneyin.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} bu platformda desteklenmiyor.",
   "agent.runtime_download.installing": "Çalışma ortamı doğrulanıyor ve yükleniyor…",
+  "agent.runtime_download.missing": "Çalışma zamanı yüklü değil. Bu aracıyı kullanmak için npm kayıt defterinden indirin.",
   "agent.runtime_download.preparing": "Gerekli çalışma ortamı kontrol ediliyor…",
   "agent.runtime_download.title": "{{runtime}} hazırlanıyor",
   "agent.session.add.title": "Oturum Ekle",

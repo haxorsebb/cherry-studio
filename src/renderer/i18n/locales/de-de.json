@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Laufzeitumgebung kann nicht gespeichert werden. Prüfen Sie Speicherplatz und Berechtigungen und versuchen Sie es erneut.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} wird auf dieser Plattform nicht unterstützt.",
   "agent.runtime_download.installing": "Laufzeitumgebung wird geprüft und installiert…",
+  "agent.runtime_download.missing": "Die Laufzeitumgebung ist nicht installiert. Laden Sie sie aus der npm-Registry herunter, um diesen Agenten zu verwenden.",
   "agent.runtime_download.preparing": "Erforderliche Laufzeitumgebung wird geprüft…",
   "agent.runtime_download.title": "{{runtime}} wird vorbereitet",
   "agent.session.add.title": "Sitzung hinzufügen",

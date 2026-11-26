@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Không thể lưu môi trường. Hãy kiểm tra dung lượng ổ đĩa và quyền truy cập rồi thử lại.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} không hỗ trợ nền tảng này.",
   "agent.runtime_download.installing": "Đang xác minh và cài đặt môi trường…",
+  "agent.runtime_download.missing": "Runtime chưa được cài đặt. Hãy tải xuống từ kho npm để dùng tác nhân này.",
   "agent.runtime_download.preparing": "Đang kiểm tra môi trường cần thiết…",
   "agent.runtime_download.title": "Đang chuẩn bị {{runtime}}",
   "agent.session.add.title": "Thêm một phiên",

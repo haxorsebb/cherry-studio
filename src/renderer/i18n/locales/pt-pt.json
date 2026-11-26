@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Não foi possível guardar o ambiente. Verifique o espaço em disco e as permissões e tente novamente.",
   "agent.runtime_download.errors.unsupported": "O {{runtime}} não é suportado nesta plataforma.",
   "agent.runtime_download.installing": "A verificar e instalar o ambiente…",
+  "agent.runtime_download.missing": "O ambiente de execução não está instalado. Transfira-o do registo npm para utilizar este agente.",
   "agent.runtime_download.preparing": "A verificar o ambiente necessário…",
   "agent.runtime_download.title": "A preparar o {{runtime}}",
   "agent.session.add.title": "Adicionar uma sessão",

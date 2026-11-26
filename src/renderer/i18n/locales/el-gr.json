@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Δεν είναι δυνατή η αποθήκευση του περιβάλλοντος. Ελέγξτε τον χώρο στον δίσκο και τα δικαιώματα και δοκιμάστε ξανά.",
   "agent.runtime_download.errors.unsupported": "Το {{runtime}} δεν υποστηρίζεται σε αυτήν την πλατφόρμα.",
   "agent.runtime_download.installing": "Επαλήθευση και εγκατάσταση περιβάλλοντος…",
+  "agent.runtime_download.missing": "Το περιβάλλον εκτέλεσης δεν είναι εγκατεστημένο. Κατεβάστε το από το μητρώο npm για να χρησιμοποιήσετε αυτόν τον πράκτορα.",
   "agent.runtime_download.preparing": "Έλεγχος του απαιτούμενου περιβάλλοντος…",
   "agent.runtime_download.title": "Προετοιμασία του {{runtime}}",
   "agent.session.add.title": "Προσθήκη συνεδρίας",

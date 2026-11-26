@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "无法保存运行环境，请检查磁盘空间和权限后重试。",
   "agent.runtime_download.errors.unsupported": "此平台不支持 {{runtime}}。",
   "agent.runtime_download.installing": "正在校验并安装运行环境…",
+  "agent.runtime_download.missing": "尚未安装运行时。请从 npm 仓库下载后再使用此智能体。",
   "agent.runtime_download.preparing": "正在检查所需运行环境…",
   "agent.runtime_download.title": "正在准备 {{runtime}}",
   "agent.session.add.title": "添加会话",

@@ -355,6 +355,7 @@
   "agent.runtime_download.errors.storage": "Не удалось сохранить среду выполнения. Проверьте место на диске и права доступа и повторите попытку.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} не поддерживается на этой платформе.",
   "agent.runtime_download.installing": "Проверка и установка среды выполнения…",
+  "agent.runtime_download.missing": "Среда выполнения не установлена. Загрузите её из реестра npm, чтобы использовать этого агента.",
   "agent.runtime_download.preparing": "Проверка необходимой среды выполнения…",
   "agent.runtime_download.title": "Подготовка {{runtime}}",
   "agent.session.add.title": "Добавить сеанс",

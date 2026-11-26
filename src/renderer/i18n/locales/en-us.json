@@ -349,6 +349,7 @@
   "agent.runtime_download.errors.storage": "Unable to save the runtime. Check disk space and permissions, then retry.",
   "agent.runtime_download.errors.unsupported": "{{runtime}} is not supported on this platform.",
   "agent.runtime_download.installing": "Verifying and installing runtime…",
+  "agent.runtime_download.missing": "The runtime is not installed. Download it from the npm registry to use this agent.",
   "agent.runtime_download.preparing": "Checking the required runtime…",
   "agent.runtime_download.title": "Preparing {{runtime}}",
   "agent.session.add.title": "Add a session",
