@@ -7,7 +7,6 @@ import { providerService } from '@data/services/ProviderService'
 import { generateOrderKeySequenceBetween } from '@data/services/utils/orderKey'
 import { resolveRegistryPaths } from '@data/services/utils/registryDataPaths'
 import { loggerService } from '@logger'
-import type { AuthConfig } from '@shared/data/types/provider'
 
 import type { DbType, ISeeder } from '../../types'
 
@@ -16,39 +15,36 @@ const SEEDER_REVISION = 1
 const LEGACY_INVALID_ORDER_KEY = 'zz'
 
 /**
+ * Privacy edition: only presets that talk to a server on the user's own machine or network
+ * are seeded, so no cloud provider is ever offered. Filtering here instead of deleting
+ * entries from the provider registry keeps that file identical to upstream.
+ */
+const LOCAL_PRESET_PROVIDER_IDS = new Set([
+  'comfyui',
+  'gpustack',
+  'litellm',
+  'lmstudio',
+  'new-api',
+  'ollama',
+  'omlx',
+  'ovms',
+  'rapid-mlx'
+])
+
+/**
  * Seed rows are DELTA rows: registry-owned connection config
  * (endpointConfigs, defaultChatEndpoint) is NOT persisted —
  * it resolves from the registry at read time (#17096), so registry updates
  * reach existing installs without reconciliation. Only user-editable
- * scaffolding is seeded: identity, display name, and the auth shell below.
- *
- * Per the v2 invariant in `ProviderSettings/utils/provider.ts` ("Azure/Vertex/Bedrock
- * reuse other vendors' endpoint protocols, so authType is the only reliable
- * discriminator"), vendor URL routing for those providers is driven by
- * `authType` (`iam-azure` → AI SDK `createAzure`, `iam-gcp` → Vertex SDK).
+ * scaffolding is seeded: identity and display name. (Upstream also seeded an
+ * auth shell for Azure, Vertex and Bedrock; none of them is a local preset.)
  */
-function getSeedAuthConfig(providerId: string): AuthConfig | null {
-  if (providerId === 'vertexai') {
-    return { type: 'iam-gcp', project: '', location: '' }
-  }
-
-  if (providerId === 'azure-openai') {
-    return { type: 'iam-azure', apiVersion: '' }
-  }
-
-  if (providerId === 'aws-bedrock') {
-    return { type: 'iam-aws', region: '' }
-  }
-
-  return null
-}
-
 function toDbRow(p: ProtoProviderConfig) {
   return {
     providerId: p.id,
     presetProviderId: p.presetProviderId ?? p.id,
     name: p.name,
-    authConfig: getSeedAuthConfig(p.id)
+    authConfig: null
   }
 }
 
@@ -77,7 +73,7 @@ export class PresetProviderSeeder implements ISeeder {
       throw new Error('PresetProviderSeeder: failed to load registry providers', { cause: error })
     }
 
-    const rows = rawProviders.map(toDbRow)
+    const rows = rawProviders.filter((provider) => LOCAL_PRESET_PROVIDER_IDS.has(provider.id)).map(toDbRow)
 
     db.transaction((tx) => {
       const invalidProviders = tx

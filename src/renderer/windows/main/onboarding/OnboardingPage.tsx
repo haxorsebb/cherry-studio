@@ -103,6 +103,9 @@ export default function OnboardingPage({
   const loginLoadingTimeoutRef = useRef<number | null>(null)
   const cloudStatusRef = useRef<CherryCloudStatus | null>(null)
   const hasRoutedCloudLoginRef = useRef(false)
+  // Privacy edition: no hosted sign-in and no telemetry, so the sign-in button and the
+  // data-collection consent row on the welcome step are never rendered.
+  const hostedServicesAvailable = false
   const isCnEdition = appEdition === 'cn'
   const shouldUseCherryAccountLogin = isCnEdition && enableCherryAccountLogin
   const {
@@ -166,7 +169,9 @@ export default function OnboardingPage({
         .get('/assistants', { query: { limit: 2 } })
         .then(async ({ items, total }) => {
           const assistant = total === 1 ? items[0] : undefined
-          if (assistant?.modelId === CHERRYAI_DEFAULT_UNIQUE_MODEL_ID) {
+          // Privacy edition: the seeded assistant starts without a model, so "no model" also
+          // counts as untouched (upstream only looked for the CherryAI default).
+          if (assistant && (assistant.modelId == null || assistant.modelId === CHERRYAI_DEFAULT_UNIQUE_MODEL_ID)) {
             await dataApiService.patch(`/assistants/${assistant.id}`, { body: { modelId: model.id } })
           }
         })
@@ -451,22 +456,24 @@ export default function OnboardingPage({
                     <p className="m-0 text-muted-foreground text-sm">{t('onboarding.welcome.subtitle')}</p>
                   </div>
                   <div className="mt-8 flex w-full flex-col gap-3">
-                    <Button
-                      type="button"
-                      size="lg"
-                      className="h-11 w-full rounded-xl"
-                      loading={isPrimaryLoginPending}
-                      disabled={
-                        isUpdatingPrivacy || (shouldUseCherryAccountLogin && cloudStatus?.phase === 'signed-in')
-                      }
-                      onClick={() =>
-                        void runAfterPrivacyChoice(
-                          shouldUseCherryAccountLogin ? handleCherryCloudLogin : handleCherryInLogin
-                        )
-                      }>
-                      {!isPrimaryLoginPending && <LogIn size={16} />}
-                      {primaryLoginLabel}
-                    </Button>
+                    {hostedServicesAvailable && (
+                      <Button
+                        type="button"
+                        size="lg"
+                        className="h-11 w-full rounded-xl"
+                        loading={isPrimaryLoginPending}
+                        disabled={
+                          isUpdatingPrivacy || (shouldUseCherryAccountLogin && cloudStatus?.phase === 'signed-in')
+                        }
+                        onClick={() =>
+                          void runAfterPrivacyChoice(
+                            shouldUseCherryAccountLogin ? handleCherryCloudLogin : handleCherryInLogin
+                          )
+                        }>
+                        {!isPrimaryLoginPending && <LogIn size={16} />}
+                        {primaryLoginLabel}
+                      </Button>
+                    )}
                     {!shouldUseCherryAccountLogin && showCherryInKeySetup ? (
                       <div className="flex flex-col items-center gap-2 text-center">
                         <p className="text-muted-foreground text-sm">
@@ -584,7 +591,7 @@ export default function OnboardingPage({
             )}
           </div>
 
-          {step === 'welcome' && (
+          {hostedServicesAvailable && step === 'welcome' && (
             <div className="nodrag flex shrink-0 justify-center px-6 py-3">
               <div className="flex max-w-full items-center gap-2 text-center text-muted-foreground text-xs leading-relaxed">
                 <Checkbox
