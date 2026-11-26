@@ -3403,7 +3403,6 @@
   "onboarding.select_model.title": "Wählen Sie Ihre Standardmodelle",
   "onboarding.skip": "Überspringen",
   "onboarding.toast.complete_failed": "Einrichtung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
-  "onboarding.toast.connected": "Erfolgreich mit CherryIN verbunden",
   "onboarding.welcome.login_cherry_cloud": "Bei Cherry Cloud anmelden",
   "onboarding.welcome.login_cherryin": "Mit CherryIN anmelden",
   "onboarding.welcome.other_provider": "Andere Anbieter auswählen",

@@ -3403,7 +3403,6 @@
   "onboarding.select_model.title": "기본 모델 선택",
   "onboarding.skip": "나중에 설정",
   "onboarding.toast.complete_failed": "설정을 완료하지 못했습니다. 다시 시도해 주세요.",
-  "onboarding.toast.connected": "CherryIN에 연결되었습니다",
   "onboarding.welcome.login_cherry_cloud": "Cherry Cloud에 로그인",
   "onboarding.welcome.login_cherryin": "CherryIN 연결",
   "onboarding.welcome.other_provider": "다른 제공자 설정",

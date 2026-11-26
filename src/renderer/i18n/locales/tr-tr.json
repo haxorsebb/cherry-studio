@@ -3403,7 +3403,6 @@
   "onboarding.select_model.title": "Varsayılan Modeli Seçin",
   "onboarding.skip": "Daha sonra ayarla",
   "onboarding.toast.complete_failed": "Kurulum tamamlanamadı. Lütfen tekrar deneyin.",
-  "onboarding.toast.connected": "CherryIN'e başarıyla bağlanıldı",
   "onboarding.welcome.login_cherry_cloud": "Cherry Cloud'da oturum aç",
   "onboarding.welcome.login_cherryin": "CherryIN'e Bağlan",
   "onboarding.welcome.other_provider": "Başka bir sağlayıcı ayarla",

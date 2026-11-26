@@ -3407,7 +3407,6 @@
   "onboarding.select_model.title": "Alege modelul implicit",
   "onboarding.skip": "Sariți",
   "onboarding.toast.complete_failed": "Nu s-a putut finaliza configurarea. Încearcă din nou.",
-  "onboarding.toast.connected": "Conectat cu succes la CherryIN",
   "onboarding.welcome.login_cherry_cloud": "Conectare la Cherry Cloud",
   "onboarding.welcome.login_cherryin": "Conectare cu CherryIN",
   "onboarding.welcome.other_provider": "Configurează un alt furnizor",

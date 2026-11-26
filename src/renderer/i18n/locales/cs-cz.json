@@ -3407,7 +3407,6 @@
   "onboarding.select_model.title": "Výběr výchozího modelu",
   "onboarding.skip": "Nastavit později",
   "onboarding.toast.complete_failed": "Úvodní nastavení nelze dokončit. Zkuste to prosím znovu.",
-  "onboarding.toast.connected": "Úspěšně připojeno ke CherryIN",
   "onboarding.welcome.login_cherry_cloud": "Přihlásit se do Cherry Cloud",
   "onboarding.welcome.login_cherryin": "Připojit CherryIN",
   "onboarding.welcome.other_provider": "Nastavit jiného poskytovatele",

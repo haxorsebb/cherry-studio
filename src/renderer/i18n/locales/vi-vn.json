@@ -3403,7 +3403,6 @@
   "onboarding.select_model.title": "Chọn Mô hình Mặc định của Bạn",
   "onboarding.skip": "Bỏ qua",
   "onboarding.toast.complete_failed": "Không thể hoàn tất thiết lập. Vui lòng thử lại.",
-  "onboarding.toast.connected": "Đã kết nối thành công với CherryIN",
   "onboarding.welcome.login_cherry_cloud": "Đăng nhập vào Cherry Cloud",
   "onboarding.welcome.login_cherryin": "Đăng nhập bằng CherryIN",
   "onboarding.welcome.other_provider": "Chọn Nhà Cung Cấp Khác",

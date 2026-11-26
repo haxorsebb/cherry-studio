@@ -3403,7 +3403,6 @@
   "onboarding.select_model.title": "选择默认模型",
   "onboarding.skip": "稍后设置",
   "onboarding.toast.complete_failed": "无法完成引导，请重试",
-  "onboarding.toast.connected": "成功连接 CherryIN",
   "onboarding.welcome.login_cherry_cloud": "Cherry Cloud 登录",
   "onboarding.welcome.login_cherryin": "连接 CherryIN",
   "onboarding.welcome.other_provider": "配置其他服务商",
