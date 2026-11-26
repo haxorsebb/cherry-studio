@@ -267,14 +267,14 @@
     {
       "targetKey": "chat.web_search.default_search_keywords_provider",
       "type": "PreferenceTypes.WebSearchProviderId",
-      "defaultValue": "exa-mcp",
+      "defaultValue": "duckduckgo",
       "status": "classified",
       "description": "Default Web Search provider for keyword search capability"
     },
     {
       "targetKey": "chat.web_search.default_fetch_urls_provider",
       "type": "PreferenceTypes.WebSearchProviderId",
-      "defaultValue": "jina",
+      "defaultValue": "fetch",
       "status": "classified",
       "description": "Default Web Search provider for URL fetch capability"
     },
