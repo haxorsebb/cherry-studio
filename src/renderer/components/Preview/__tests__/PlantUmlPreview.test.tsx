@@ -1,3 +1,4 @@
+import { MockUsePreferenceUtils } from '@test-mocks/renderer/usePreference'
 import { render } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -43,13 +44,15 @@ describe('PlantUmlPreview', () => {
     vi.clearAllMocks()
     mocks.renderFunction = undefined
     vi.stubGlobal('fetch', fetchMock)
+    MockUsePreferenceUtils.resetMocks()
+    MockUsePreferenceUtils.setPreferenceValue('chat.code.preview.plantuml_server_url', 'http://127.0.0.1:8080/')
   })
 
   afterEach(() => {
     vi.unstubAllGlobals()
   })
 
-  it('fetches and renders the encoded PlantUML diagram', async () => {
+  it('sends the diagram to the configured server only', async () => {
     const container = document.createElement('div')
     fetchMock.mockResolvedValue({
       ok: true,
@@ -59,10 +62,16 @@ describe('PlantUmlPreview', () => {
     render(<PlantUmlPreview>{content}</PlantUmlPreview>)
     await mocks.renderFunction?.(content, container)
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.stringMatching(/^https:\/\/www\.plantuml\.com\/plantuml\/svg\/[A-Za-z0-9_-]+$/)
-    )
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringMatching(/^http:\/\/127\.0\.0\.1:8080\/svg\/[A-Za-z0-9_-]+$/))
     expect(mocks.renderSvgInShadowHost).toHaveBeenCalledWith('<svg><text>diagram</text></svg>', container)
+  })
+
+  it('makes no request when no server is configured', async () => {
+    MockUsePreferenceUtils.setPreferenceValue('chat.code.preview.plantuml_server_url', '  ')
+    render(<PlantUmlPreview>{content}</PlantUmlPreview>)
+
+    await expect(mocks.renderFunction?.(content, document.createElement('div'))).rejects.toThrow()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it.each([

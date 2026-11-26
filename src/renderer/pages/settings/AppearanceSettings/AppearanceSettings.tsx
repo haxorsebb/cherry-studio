@@ -10,6 +10,7 @@ import {
   type ComboboxOption,
   Flex,
   InfoTooltip,
+  Input,
   InputNumber,
   SegmentedControl,
   Switch,
@@ -125,6 +126,7 @@ const AppearanceSettings: FC = () => {
     timeoutMinutes: 'chat.code.execution.timeout_minutes'
   })
   const [codeImageTools, setCodeImageTools] = usePreference('chat.code.image_tools')
+  const [plantUmlServerUrl, setPlantUmlServerUrl] = usePreference('chat.code.preview.plantuml_server_url')
 
   const [currentZoom, setCurrentZoom] = useState(1.0)
   const [fontList, setFontList] = useState<string[]>([])
@@ -528,6 +530,23 @@ const AppearanceSettings: FC = () => {
             <InfoTooltip content={t('chat.settings.code_image_tools.tip')} />
           </Flex>
           <Switch checked={codeImageTools} onCheckedChange={setCodeImageTools} />
+        </SettingRow>
+        <SettingDivider />
+        <SettingRow id="setting-appearance-plantuml-server" className="scroll-mt-6">
+          <Flex className="items-center gap-1">
+            <SettingRowTitle>{t('chat.settings.plantuml_server.label')}</SettingRowTitle>
+            <InfoTooltip content={t('chat.settings.plantuml_server.tip')} />
+          </Flex>
+          {/* Keyed on the stored value so an external change resets the uncommitted draft. */}
+          <Input
+            key={plantUmlServerUrl}
+            aria-label={t('chat.settings.plantuml_server.label')}
+            className="w-64 text-sm"
+            defaultValue={plantUmlServerUrl}
+            placeholder="http://127.0.0.1:8080"
+            spellCheck={false}
+            onBlur={(event) => setPlantUmlServerUrl(event.target.value.trim())}
+          />
         </SettingRow>
       </SettingGroup>
 

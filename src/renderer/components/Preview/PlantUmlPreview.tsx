@@ -1,6 +1,8 @@
 import pako from 'pako'
 import React, { memo, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
+import { usePreference } from '@data/hooks/usePreference'
 import { loggerService } from '@logger'
 
 import { useDebouncedRender } from './hooks/useDebouncedRender'
@@ -11,7 +13,6 @@ import { renderSvgInShadowHost } from './utils'
 
 const logger = loggerService.withContext('PlantUmlPreview')
 
-const PlantUMLServer = 'https://www.plantuml.com/plantuml'
 function encode64(data: Uint8Array) {
   let r = ''
   for (let i = 0; i < data.length; i += 3) {
@@ -73,12 +74,12 @@ function encodeDiagram(diagram: string): string {
   return encode64(compressed)
 }
 
-function getPlantUMLImageUrl(format: 'png' | 'svg', diagram: string, isDark?: boolean) {
+function getPlantUMLImageUrl(server: string, format: 'png' | 'svg', diagram: string, isDark?: boolean) {
   const encodedDiagram = encodeDiagram(diagram)
   if (isDark) {
-    return `${PlantUMLServer}/d${format}/${encodedDiagram}`
+    return `${server}/d${format}/${encodedDiagram}`
   }
-  return `${PlantUMLServer}/${format}/${encodedDiagram}`
+  return `${server}/${format}/${encodedDiagram}`
 }
 
 const PlantUmlPreview = ({
@@ -86,27 +87,38 @@ const PlantUmlPreview = ({
   enableToolbar = false,
   ref
 }: BasicPreviewProps & { ref?: React.RefObject<BasicPreviewHandles | null> }) => {
-  // 定义渲染函数
-  const renderPlantUml = useCallback(async (content: string, container: HTMLDivElement) => {
-    const url = getPlantUMLImageUrl('svg', content, false)
-    const response = await fetch(url)
-    if (!response.ok) {
-      if (response.status === 400) {
-        throw new Error(
-          'Diagram rendering failed (400): This is likely due to a syntax error in the diagram. Please check your code.'
-        )
-      }
-      if (response.status >= 500) {
-        throw new Error(
-          `Diagram rendering failed (${response.status}): The PlantUML server is temporarily unavailable. Please try again later.`
-        )
-      }
-      throw new Error(`Diagram rendering failed, server returned: ${response.status} ${response.statusText}`)
-    }
+  const { t } = useTranslation()
+  // The diagram source is part of the request URL, so it only goes to the server the user configured.
+  const [serverUrl] = usePreference('chat.code.preview.plantuml_server_url')
+  const server = serverUrl.trim().replace(/\/+$/, '')
 
-    const text = await response.text()
-    renderSvgInShadowHost(text, container)
-  }, [])
+  // 定义渲染函数
+  const renderPlantUml = useCallback(
+    async (content: string, container: HTMLDivElement) => {
+      if (!server) {
+        throw new Error(t('chat.settings.plantuml_server.not_configured'))
+      }
+      const url = getPlantUMLImageUrl(server, 'svg', content, false)
+      const response = await fetch(url)
+      if (!response.ok) {
+        if (response.status === 400) {
+          throw new Error(
+            'Diagram rendering failed (400): This is likely due to a syntax error in the diagram. Please check your code.'
+          )
+        }
+        if (response.status >= 500) {
+          throw new Error(
+            `Diagram rendering failed (${response.status}): The PlantUML server is temporarily unavailable. Please try again later.`
+          )
+        }
+        throw new Error(`Diagram rendering failed, server returned: ${response.status} ${response.statusText}`)
+      }
+
+      const text = await response.text()
+      renderSvgInShadowHost(text, container)
+    },
+    [server, t]
+  )
 
   // 使用预览渲染器 hook
   const { containerRef, error, isLoading } = useDebouncedRender(children, renderPlantUml, {
