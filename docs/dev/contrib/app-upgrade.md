@@ -13,7 +13,7 @@ sources:
 
 ## Overview
 
-> **Privacy edition:** updates are disabled. `AppUpdaterService.updatesUnsupported()` always returns `true`, so there is no scheduled or manual update check and no release-history request, and the About page hides its update controls. The rest of this document describes the upstream mechanism, kept for reference when merging.
+> **Privacy edition:** updates are disabled. `AppUpdaterService.updatesUnsupported()` always returns `true`, so there is no scheduled or manual update check and no release-history request, and the About page hides its update controls. `electron-builder.yml` sets `publish: null`, so packages ship without an `app-update.yml` feed. The rest of this document describes the upstream mechanism, kept for reference when merging.
 
 Cherry Studio clients check for updates through the managed release service at `https://releases.cherry-ai.com`. The client selects an edition-specific update channel and sends application, edition, client, platform, and region metadata. The release service owns target-version selection, regional mirrors, rollout policy, and required upgrade gateways.
 
