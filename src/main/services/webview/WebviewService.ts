@@ -6,6 +6,7 @@ import { application } from '@application'
 import { loggerService } from '@logger'
 import { BaseService, DependsOn, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import { getAppLanguage, t } from '@main/i18n'
+import { applySpellCheck } from '@main/services/spellCheckLanguages'
 import type { WindowId } from '@shared/ipc/types'
 import type { WebviewAnnotation, WebviewAnnotationTarget } from '@shared/types/webviewAnnotation'
 import { getWebviewPartition, WebviewSecurityProfile } from '@shared/utils/webviewSecurity'
@@ -319,7 +320,8 @@ export class WebviewService extends BaseService {
   }
 
   setSpellCheckerEnabled(webviewId: number, isEnable: boolean, senderId: WindowId | null): void {
-    this.findOwnedGuest(webviewId, senderId)?.session.setSpellCheckerEnabled(isEnable)
+    const guestSession = this.findOwnedGuest(webviewId, senderId)?.session
+    if (guestSession) applySpellCheck(guestSession, isEnable)
   }
 
   setGuestVisible(webviewId: number, visible: boolean, senderId: WindowId | null): void {

@@ -19,6 +19,7 @@ import { t } from '@main/i18n'
 import { openRequestPath } from '@main/services/file'
 import { fitMainWindowBounds, resolveMainWindowOptions } from '@main/services/mainWindowBounds'
 import { openTabInMainWindow, resetMainRendererTabAttachDelivery } from '@main/services/mainWindowNavigation'
+import { applySpellCheck } from '@main/services/spellCheckLanguages'
 import {
   AgentDevPreviewRequestPolicy,
   AgentHtmlArtifactRequestPolicy,
@@ -327,10 +328,7 @@ export class MainWindowService extends BaseService {
       try {
         const enabled = preferenceService.get('app.spell_check.enabled')
         const languages = preferenceService.get('app.spell_check.languages')
-        session.defaultSession.setSpellCheckerEnabled(enabled)
-        if (enabled && languages.length > 0) {
-          session.defaultSession.setSpellCheckerLanguages(languages)
-        }
+        applySpellCheck(session.defaultSession, enabled, languages)
       } catch (error) {
         logger.error('Failed to apply spell check settings:', error as Error)
       }

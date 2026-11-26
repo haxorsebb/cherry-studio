@@ -30,6 +30,7 @@ import { runDataReset } from '@main/services/dataReset'
 import { initSentry } from '@main/services/errorReporting'
 import { CHERRY_MEDIA_SCHEME_DECLARATION } from '@main/services/mediaProtocol'
 import { configureRemoteDebugging } from '@main/services/remoteDebugging'
+import { deferSpellCheckDictionaries } from '@main/services/spellCheckLanguages'
 import { runUserDataRelocation } from '@main/services/userDataRelocation'
 import { getApplicationId } from '@main/utils/appEdition'
 
@@ -41,6 +42,8 @@ resolveUserDataLocation()
 requireSingleInstance()
 configureChromiumFlags()
 configureRemoteDebugging()
+// Must precede the first session: it cancels Chromium's dictionary download at session creation.
+deferSpellCheckDictionaries()
 initCrashTelemetry()
 // Freeze the path registry — bootstrap() asserts this completed.
 application.initPathRegistry()
