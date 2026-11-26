@@ -1,6 +1,9 @@
 import { expect, test } from './fixtures/electron.fixture'
 import { openSettings } from './utils/navigation'
 
+// Privacy edition: only local provider presets are offered, so there is no StepFun entry to open.
+test.skip(true, 'The StepFun cloud preset is not offered in the Privacy edition')
+
 test('manually added StepFun preview exposes low, medium and high reasoning effort', async ({
   mainWindow
 }, testInfo) => {

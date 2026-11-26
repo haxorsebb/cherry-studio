@@ -7,6 +7,9 @@ import { LATEST_PRIVACY_POLICY_VERSION } from '../../../src/shared/utils/constan
 import { selectSidebarApp } from '../regression/navigation'
 import { expect, test } from './fixtures/electron.fixture'
 
+// Privacy edition: a failed search is reported, never rerouted, so there is no fallback notice.
+test.skip(true, 'A failed search is never rerouted to another provider in the Privacy edition')
+
 test('shows the provider fallback notice after a real search dispatch', async ({ mainWindow: page }, testInfo) => {
   test.setTimeout(180_000)
   const query = 'Cherry Studio deterministic fallback query'

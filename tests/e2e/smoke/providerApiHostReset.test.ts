@@ -24,6 +24,7 @@ async function attachScreenshot(page: Page, testInfo: TestInfo, name: string) {
   await testInfo.attach(name, { path, contentType: 'image/png' })
 }
 
+// Privacy edition: cloud presets are not offered, so the reset is exercised on a local preset.
 test('confirms provider API host reset and keeps edits on cancel', async ({ mainWindow }, testInfo) => {
   await mainWindow.evaluate(async (policyVersion) => {
     await window.api.preference.set('app.privacy.policy_version', policyVersion)
@@ -44,11 +45,11 @@ test('confirms provider API host reset and keeps edits on cancel', async ({ main
   await expect(settings, 'Setup: Settings must open in exactly one visible view').toHaveCount(1)
   const detail = settings.getByTestId('provider-detail-shell')
 
-  const openDeepseek = async () => {
+  const openLitellm = async () => {
     await openSettingsSection(mainWindow, en['settings.provider.title'])
     const search = settings.getByPlaceholder(en['settings.provider.search'], { exact: true })
-    await expect(search, 'Setup: the provider list must load before selecting deepseek').toBeVisible()
-    const row = settings.getByTestId('provider-list-item-deepseek')
+    await expect(search, 'Setup: the provider list must load before selecting litellm').toBeVisible()
+    const row = settings.getByTestId('provider-list-item-litellm')
     if (!(await row.isVisible())) {
       await search.fill('')
       if (!(await row.isVisible())) {
@@ -56,31 +57,31 @@ test('confirms provider API host reset and keeps edits on cancel', async ({ main
         await mainWindow.getByRole('button', { name: en['settings.provider.filter.all'], exact: true }).click()
       }
     }
-    await expect(row, 'Setup: provider id "deepseek" is missing or hidden after clearing filters').toBeVisible()
+    await expect(row, 'Setup: provider id "litellm" is missing or hidden after clearing filters').toBeVisible()
     await row.click()
     const field = detail.locator('#setting-provider-api-host')
     const controls = {
       input: field.getByRole('textbox', { name: en['settings.provider.api_host'], exact: true }),
       reset: field.getByRole('button', { name: en['settings.provider.api.url.reset'], exact: true })
     }
-    await expect(controls.input, 'Setup: provider deepseek must expose its primary API Host input').toBeVisible()
+    await expect(controls.input, 'Setup: provider litellm must expose its primary API Host input').toBeVisible()
     return controls
   }
 
-  const reopenDeepseek = async () => {
+  const reopenLitellm = async () => {
     await openSettingsSection(mainWindow, en['settings.appearance.title'])
     await expect(detail, 'Persistence check must leave the provider detail before reopening it').toHaveCount(0)
-    return openDeepseek()
+    return openLitellm()
   }
 
-  let { input, reset } = await openDeepseek()
+  let { input, reset } = await openLitellm()
   const defaultHost = await input.inputValue()
-  expect(defaultHost.trim(), 'Setup: provider deepseek must have a non-empty registry default API host').not.toBe('')
+  expect(defaultHost.trim(), 'Setup: provider litellm must have a non-empty registry default API host').not.toBe('')
   const customHost = 'https://undo-22892.example/v1'
   expect(customHost, 'Setup: the custom host must differ from the default to exercise reset').not.toBe(defaultHost)
   await input.fill(customHost)
   await input.press('Tab')
-  ;({ input, reset } = await reopenDeepseek())
+  ;({ input, reset } = await reopenLitellm())
   await expect(input, 'Issue #22892: the custom host must be saved before exercising reset').toHaveValue(customHost)
   await expect(reset, 'Issue #22892: a saved custom host must offer Reset').toBeVisible()
 
@@ -122,7 +123,7 @@ test('confirms provider API host reset and keeps edits on cancel', async ({ main
   await expect(reset, 'Issue #22892: the default host must no longer offer Reset').toHaveCount(0)
   await attachScreenshot(mainWindow, testInfo, '22892-confirmed-default')
 
-  ;({ input, reset } = await reopenDeepseek())
+  ;({ input, reset } = await reopenLitellm())
   await expect(input, 'Issue #22892: the confirmed default must persist after reopening').toHaveValue(defaultHost)
   await expect(reset, 'Issue #22892: a persisted default must remain non-resettable').toHaveCount(0)
   const defaultAfterReopen = await input.inputValue()
@@ -136,7 +137,7 @@ test('confirms provider API host reset and keeps edits on cancel', async ({ main
   await testInfo.attach('22892-provider-api-host-reset-evidence.json', {
     body: JSON.stringify(
       {
-        providerId: 'deepseek',
+        providerId: 'litellm',
         defaultHost,
         customHost,
         valueBehindDialog,
