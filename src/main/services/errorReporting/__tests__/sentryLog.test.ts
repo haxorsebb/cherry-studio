@@ -53,6 +53,13 @@ const { captureExceptionMock, captureEventMock, preferences, tmpLogsDir } = vi.h
 vi.unmock('@logger')
 vi.unmock('winston')
 vi.unmock('winston-daily-rotate-file')
+// Privacy edition: the real gate always answers "no" (see privacyConsent.ts). These tests cover
+// the reporting code kept behind it, so they run against upstream's consent rule.
+vi.mock('@main/utils/privacyConsent', () => ({
+  isDataCollectionConsented: (enabled: boolean, policyVersion: string) =>
+    enabled && policyVersion === LATEST_PRIVACY_POLICY_VERSION
+}))
+
 vi.mock('@main/core/paths/constants', () => ({ LOGS_DIR: tmpLogsDir }))
 vi.mock('@main/ipc/handlers/ipcHandlers', async () => {
   const { agentHandlers } = await import('@main/ipc/handlers/agent')

@@ -58,6 +58,13 @@ const posthog = vi.hoisted(() => ({
   constructor: vi.fn()
 }))
 
+// Privacy edition: the real gate always answers "no" (see privacyConsent.ts). These tests cover
+// the reporting code kept behind it, so they run against upstream's consent rule.
+vi.mock('@main/utils/privacyConsent', () => ({
+  isDataCollectionConsented: (enabled: boolean, policyVersion: string) =>
+    enabled && policyVersion === LATEST_PRIVACY_POLICY_VERSION
+}))
+
 vi.mock('posthog-node', () => ({
   PostHog: vi.fn(function PostHogMock(key: string, options: unknown) {
     posthog.constructor(key, options)
