@@ -78,9 +78,16 @@ export const useWebSearchProviders = () => {
   const [defaultFetchUrlsProviderId, setDefaultFetchUrlsProviderId] = usePreference(
     'chat.web_search.default_fetch_urls_provider'
   )
+  // Zhipu web search borrows the Zhipu model provider's keys. Only ask for them while it is in
+  // use: that provider is not seeded here, and an unconditional request logs "not found".
+  const usesZhipu =
+    defaultSearchKeywordsProviderId === 'zhipu' ||
+    defaultFetchUrlsProviderId === 'zhipu' ||
+    providerOverrides.zhipu !== undefined
   const { data: zhipuModelApiKeys, isLoading } = useQuery('/providers/:providerId/api-keys', {
     params: { providerId: 'zhipu' },
-    query: { enabled: true }
+    query: { enabled: true },
+    enabled: usesZhipu
   })
   const providers = useMemo<WebSearchProvider[]>(() => {
     if (isLoading) {

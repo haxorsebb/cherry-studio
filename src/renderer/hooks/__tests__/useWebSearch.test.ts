@@ -1,4 +1,4 @@
-import { MockUseDataApiUtils } from '@test-mocks/renderer/useDataApi'
+import { MockUseDataApiUtils, mockUseQuery } from '@test-mocks/renderer/useDataApi'
 import { MockUsePreferenceUtils } from '@test-mocks/renderer/usePreference'
 import { act, renderHook } from '@testing-library/react'
 import type * as ReactI18next from 'react-i18next'
@@ -21,6 +21,28 @@ describe('useWebSearch', () => {
     MockUseDataApiUtils.resetMocks()
     MockUseDataApiUtils.mockQueryData('/providers/:providerId/api-keys', { keys: [] })
     MockUsePreferenceUtils.resetMocks()
+  })
+
+  // Privacy edition: the Zhipu model provider is not seeded, so its keys must not be requested
+  // unless the user actually uses Zhipu web search (an unconditional request logs "not found").
+  it.each([
+    { label: 'with the default providers', setup: () => {}, enabled: false },
+    {
+      label: 'once Zhipu is the default search provider',
+      setup: () =>
+        MockUsePreferenceUtils.setPreferenceValue('chat.web_search.default_search_keywords_provider', 'zhipu'),
+      enabled: true
+    }
+  ])('requests the Zhipu model provider keys only while Zhipu is in use: $label', ({ setup, enabled }) => {
+    MockUsePreferenceUtils.setPreferenceValue('chat.web_search.provider_overrides', {})
+    setup()
+
+    renderHook(() => useWebSearchProviders())
+
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      '/providers/:providerId/api-keys',
+      expect.objectContaining({ params: { providerId: 'zhipu' }, enabled })
+    )
   })
 
   it('inherits enabled Zhipu model provider API keys when web search keys are empty', () => {
