@@ -57,7 +57,8 @@ const NotificationSettings: FC = () => {
       <SettingGroup theme={theme}>
         <SettingTitle>{t('settings.notification.center')}</SettingTitle>
         <SettingDivider />
-        {(['system', 'usage', 'official'] as const).map((category) => (
+        {/* Privacy edition: no 'official' row; vendor announcements are never fetched. */}
+        {(['system', 'usage'] as const).map((category) => (
           <Fragment key={category}>
             <SettingRow id={`setting-notifications-${category}-center`} className="scroll-mt-6">
               <SettingRowTitle>{categoryLabels[category]}</SettingRowTitle>

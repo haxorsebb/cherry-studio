@@ -76,12 +76,10 @@ import { MediaProtocolService } from '@main/services/mediaProtocol'
 import { NetworkService } from '@main/services/network'
 import { NotificationService } from '@main/services/NotificationService'
 import { OAuthRuntimeService } from '@main/services/oauth/runtime/OAuthRuntimeService'
-import { OfficialAnnouncementService } from '@main/services/OfficialAnnouncementService'
 import { OpenClawService } from '@main/services/OpenClawService'
 import { OvmsManager } from '@main/services/OvmsManager'
 import { PdfTranslationService } from '@main/services/PdfTranslationService'
 import { ProtocolService } from '@main/services/protocol/ProtocolService'
-import { ProviderRegistryUpdaterService } from '@main/services/ProviderRegistryUpdaterService'
 import { ProxyService } from '@main/services/proxy/ProxyService'
 import { PythonService } from '@main/services/PythonService'
 import { QuickAssistantService } from '@main/services/QuickAssistantService'
@@ -190,7 +188,6 @@ export const services = {
   NotificationService,
   ConversationNotificationService,
   UsageBudgetNotificationService,
-  OfficialAnnouncementService,
   QuickAssistantService,
   McpPackageService,
   McpRuntimeService,
@@ -223,11 +220,12 @@ export const services = {
   ApiGatewayService,
   AppUpdaterService,
   AutoBackupService,
-  ProviderRegistryUpdaterService,
   CherryInModelSyncService,
   SchedulerService,
   JobManager,
   TrashService
+  // Privacy edition: OfficialAnnouncementService and ProviderRegistryUpdaterService are not
+  // registered. Both only poll vendor servers in the background and have no other consumers.
 } as const
 
 /** Auto-derived service name to instance type mapping */
