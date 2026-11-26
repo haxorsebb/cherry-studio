@@ -1664,7 +1664,8 @@ describe('buildAgentParams web-tool routing', () => {
     }
   )
 
-  it('keeps client search available through ExaMCP when the selected provider has no key', async () => {
+  // Privacy edition: an unconfigured search provider is not silently replaced by a keyless vendor.
+  it('does not offer client search when the selected provider has no key', async () => {
     const preferences = new Map<string, unknown>([
       ['app.developer_mode.enabled', false],
       ['chat.web_search.model_tools_preferred', false],
@@ -1685,8 +1686,7 @@ describe('buildAgentParams web-tool routing', () => {
       assistant
     })
 
-    expect(result.tools?.web_search).toBe(clientSearchEntry.tool)
-    expect(result.plugins.some((plugin) => plugin.name === 'webSearch')).toBe(false)
+    expect(result.tools?.web_search).toBeUndefined()
   })
   it('disables Responses storage for assistant-backed calls too', async () => {
     resolveProviderAiSdkConfigMock.mockResolvedValue({

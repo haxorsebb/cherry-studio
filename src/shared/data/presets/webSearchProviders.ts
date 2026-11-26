@@ -184,8 +184,10 @@ export const PRESETS_WEB_SEARCH_PROVIDERS: readonly WebSearchProviderPreset[] = 
   ...WEB_SEARCH_PROVIDER_PRESET_MAP[id]
 }))
 
+// Privacy edition: a failing provider never reroutes a query or URL to a vendor the user did
+// not pick (upstream: exa-mcp and jina). Only the built-in fetch, which is local, stays.
 export const WEB_SEARCH_FALLBACK_PROVIDER_IDS_BY_CAPABILITY = {
-  searchKeywords: ['exa-mcp'],
-  fetchUrls: ['fetch', 'jina'],
+  searchKeywords: [],
+  fetchUrls: ['fetch'],
   searchImages: []
 } as const satisfies Record<WebSearchCapability, readonly WebSearchProviderId[]>

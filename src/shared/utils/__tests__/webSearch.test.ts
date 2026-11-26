@@ -76,12 +76,14 @@ describe('client web provider readiness', () => {
     ).toEqual({ ready: false, reason: 'api_host_invalid' })
   })
 
-  it('defines the complete fallback chain once per capability', () => {
-    expect(getWebSearchFallbackProviderIds('tavily', 'searchKeywords')).toEqual(['exa-mcp'])
-    expect(getWebSearchFallbackProviderIds('exa-mcp', 'searchKeywords')).toEqual([])
-    expect(getWebSearchFallbackProviderIds('querit', 'fetchUrls')).toEqual(['fetch', 'jina'])
-    expect(getWebSearchFallbackProviderIds('fetch', 'fetchUrls')).toEqual(['jina'])
+  // Privacy edition contract: a failing provider never reroutes to a vendor the user did not
+  // pick. Searches have no fallback; URL fetches only fall back to the local built-in fetch.
+  it('never falls back to a third-party provider', () => {
+    expect(getWebSearchFallbackProviderIds('tavily', 'searchKeywords')).toEqual([])
+    expect(getWebSearchFallbackProviderIds('duckduckgo', 'searchKeywords')).toEqual([])
+    expect(getWebSearchFallbackProviderIds('querit', 'fetchUrls')).toEqual(['fetch'])
     expect(getWebSearchFallbackProviderIds('jina', 'fetchUrls')).toEqual(['fetch'])
+    expect(getWebSearchFallbackProviderIds('fetch', 'fetchUrls')).toEqual([])
   })
 
   it('keeps a ready primary provider instead of replacing it with the fallback', () => {
@@ -97,21 +99,17 @@ describe('client web provider readiness', () => {
     expect(resolveReadyWebSearchProvider([exaMcp], undefined, 'searchKeywords')).toBeUndefined()
   })
 
-  it('uses the fixed keyless provider when the primary capability is not ready', () => {
+  it('leaves an unready search provider unresolved even when a keyless one is ready', () => {
     const tavily = provider('tavily')
     const exaMcp = provider('exa-mcp')
+
+    expect(resolveReadyWebSearchProvider([tavily, exaMcp], tavily, 'searchKeywords')).toBeUndefined()
+  })
+
+  it('resolves an unready URL provider to the built-in fetch', () => {
     const querit = provider('querit')
     const fetch = provider('fetch')
 
-    expect(resolveReadyWebSearchProvider([tavily, exaMcp], tavily, 'searchKeywords')).toBe(exaMcp)
     expect(resolveReadyWebSearchProvider([querit, fetch], querit, 'fetchUrls')).toBe(fetch)
-  })
-
-  it('reports the client capability unavailable when neither primary nor fallback is ready', () => {
-    const tavily = provider('tavily')
-    const exaMcp = provider('exa-mcp')
-    exaMcp.capabilities = [{ ...exaMcp.capabilities[0], apiHost: '' }]
-
-    expect(resolveReadyWebSearchProvider([tavily, exaMcp], tavily, 'searchKeywords')).toBeUndefined()
   })
 })
