@@ -57,6 +57,9 @@ const BasicDataSettings: React.FC = () => {
   const { theme } = useTheme()
   const [skipBackupFile, setSkipBackupFile] = usePreference('data.backup.general.skip_backup_file')
   const [enableDataCollection, setEnableDataCollection] = usePreference('app.privacy.data_collection.enabled')
+  // Privacy edition: analytics and crash reporting are hard-disabled in the main process,
+  // so the data-collection switch would do nothing and stays hidden.
+  const telemetryAvailable = false
   const [logRetentionDays, setLogRetentionDays] = usePreference('app.logs.retention_days')
   const refreshCacheSize = useCallback(async () => {
     try {
@@ -401,19 +404,21 @@ const BasicDataSettings: React.FC = () => {
           </RowFlex>
         </SettingRow>
       </SettingGroup>
-      <SettingGroup theme={theme}>
-        <SettingTitle>{t('settings.privacy.title')}</SettingTitle>
-        <SettingDivider />
-        <SettingRow id="setting-data-data-privacy-mode" className="scroll-mt-6">
-          <SettingRowTitle>{t('settings.privacy.enable_privacy_mode')}</SettingRowTitle>
-          <Switch
-            checked={enableDataCollection}
-            onCheckedChange={(v) => {
-              void setEnableDataCollection(v)
-            }}
-          />
-        </SettingRow>
-      </SettingGroup>
+      {telemetryAvailable && (
+        <SettingGroup theme={theme}>
+          <SettingTitle>{t('settings.privacy.title')}</SettingTitle>
+          <SettingDivider />
+          <SettingRow id="setting-data-data-privacy-mode" className="scroll-mt-6">
+            <SettingRowTitle>{t('settings.privacy.enable_privacy_mode')}</SettingRowTitle>
+            <Switch
+              checked={enableDataCollection}
+              onCheckedChange={(v) => {
+                void setEnableDataCollection(v)
+              }}
+            />
+          </SettingRow>
+        </SettingGroup>
+      )}
     </>
   )
 }

@@ -1,10 +1,8 @@
-import { LATEST_PRIVACY_POLICY_VERSION } from '@shared/utils/constants'
-
 /**
- * Whether the user consented to data collection **under the current policy**.
- * Every uploader (analytics, crash reporting) must gate on this one predicate so
- * a policy bump revokes them all together.
+ * Whether the user consented to data collection.
+ * Every uploader (analytics, crash reporting) must gate on this one predicate.
+ *
+ * Privacy edition: never consented, whatever the stored preferences say. This keeps
+ * both uploaders off without touching either of them.
  */
-export function isDataCollectionConsented(enabled: boolean, policyVersion: string): boolean {
-  return enabled && policyVersion === LATEST_PRIVACY_POLICY_VERSION
-}
+export const isDataCollectionConsented: (enabled: boolean, policyVersion: string) => boolean = () => false
