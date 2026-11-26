@@ -39,8 +39,8 @@ export async function applicationDataMigration(app: RegressionApp, page: Page, t
   const packaged = app.record.mode === 'tag'
   const initialElectronPid = app.record.electronPid
   const bootConfigPath = packaged
-    ? join(app.paths.profiles, app.record.profile, 'home', '.cherrystudio', 'boot-config.json')
-    : join(app.paths.profiles, app.record.profile, '.cherrystudio', 'boot-config.json')
+    ? join(app.paths.profiles, app.record.profile, 'home', '.cherrystudio-pe', 'boot-config.json')
+    : join(app.paths.profiles, app.record.profile, '.cherrystudio-pe', 'boot-config.json')
   const bootConfigBackup = existsSync(bootConfigPath) ? await readFile(bootConfigPath) : undefined
   let restoreBootConfig = false
   for (const directory of [destination, nonempty, readonly, backup]) await mkdir(directory, { recursive: true })
