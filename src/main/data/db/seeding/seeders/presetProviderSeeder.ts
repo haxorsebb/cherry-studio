@@ -27,7 +27,6 @@ const LOCAL_PRESET_PROVIDER_IDS = new Set([
   'new-api',
   'ollama',
   'omlx',
-  'ovms',
   'rapid-mlx'
 ])
 
