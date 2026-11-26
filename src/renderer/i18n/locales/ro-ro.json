@@ -2642,7 +2642,6 @@
   "marketplace.manage_mcp": "Gestionare MCP",
   "marketplace.mcp.configuration.filesystem": "După adăugarea serverului, deschideți setările acestuia și introduceți calea absolută a unui director pe prima linie din {{arguments}}. Alternativ, setați WORKSPACE_ROOT la acea cale în {{environment}}; aceasta are prioritate față de {{arguments}}. Dacă ambele rămân necompletate, se folosește directorul de lucru MCP integrat. Salvați și activați serverul, apoi selectați-l în setările MCP ale agentului. Fișierele din afara directorului nu pot fi accesate.",
   "marketplace.mcp.configuration.title": "Ghid de configurare",
-  "marketplace.more_sources": "Mai multe surse",
   "marketplace.no_results": "Nu s-au găsit resurse",
   "marketplace.no_results_description": "Încearcă un alt termen de căutare.",
   "marketplace.open_website": "Deschide site-ul",

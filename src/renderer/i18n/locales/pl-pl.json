@@ -2667,7 +2667,6 @@
   "marketplace.manage_mcp": "Zarządzaj MCP",
   "marketplace.mcp.configuration.filesystem": "Po dodaniu serwera otwórz jego ustawienia i wprowadź bezwzględną ścieżkę do katalogu w pierwszej linii {{arguments}}. Alternatywnie ustaw WORKSPACE_ROOT na tę ścieżkę w {{environment}}; ma to pierwszeństwo przed {{arguments}}. Pozostaw oba pola puste, aby użyć wbudowanego obszaru roboczego MCP. Zapisz i włącz serwer, a następnie wybierz go w ustawieniach MCP agenta. Dostęp do plików poza tym katalogiem jest zablokowany.",
   "marketplace.mcp.configuration.title": "Przewodnik po konfiguracji",
-  "marketplace.more_sources": "Więcej źródeł",
   "marketplace.no_results": "Nie znaleziono zasobów",
   "marketplace.no_results_description": "Spróbuj innego hasła wyszukiwania.",
   "marketplace.open_website": "Otwórz witrynę",

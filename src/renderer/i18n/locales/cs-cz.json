@@ -2642,7 +2642,6 @@
   "marketplace.manage_mcp": "Spravovat MCP",
   "marketplace.mcp.configuration.filesystem": "Po přidání serveru otevřete jeho nastavení a na první řádek {{arguments}} zadejte absolutní cestu k adresáři. Alternativně nastavte v {{environment}} proměnnou WORKSPACE_ROOT na tuto cestu; má přednost před {{arguments}}. Pokud obojí ponecháte prázdné, použije se vestavěný pracovní adresář MCP. Uložte a povolte server a poté jej vyberte v nastavení MCP agenta. Soubory mimo zadaný adresář nelze otevřít.",
   "marketplace.mcp.configuration.title": "Návod ke konfiguraci",
-  "marketplace.more_sources": "Další zdroje",
   "marketplace.no_results": "Nebyly nalezeny žádné zdroje",
   "marketplace.no_results_description": "Zkuste jiný hledaný výraz.",
   "marketplace.open_website": "Otevřít web",
