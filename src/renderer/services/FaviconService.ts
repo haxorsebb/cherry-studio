@@ -8,12 +8,9 @@ const RESOLVED_FAVICON_CACHE_PREFIX = 'favicon_src_'
 const RESOLVED_FAVICON_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000
 const FAVICON_PROBE_TIMEOUT_MS = 2000
 
-const faviconUrlsFor = (hostname: string): string[] => [
-  `https://icon.horse/icon/${hostname}`,
-  `https://favicon.splitbee.io/?url=${hostname}`,
-  `https://favicon.im/${hostname}`,
-  `https://${hostname}/favicon.ico`
-]
+// Privacy edition: only the linked site itself is asked. Upstream also queried third-party
+// favicon services, which told them every hostname that appears in a chat.
+const faviconUrlsFor = (hostname: string): string[] => [`https://${hostname}/favicon.ico`]
 
 class FaviconService {
   private resolvedSrcByHostname = new Map<string, string>()
