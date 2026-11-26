@@ -18,11 +18,11 @@ const projectRoot = path.resolve(import.meta.dirname, '../..')
 
 // Catch multipart-only requests and corrupt reconstructed bytes using the production downloader.
 describe('native differential downloads', () => {
+  // Privacy edition: electron-builder.yml has no update feed, so there is no global case.
   it.each([
-    ['global', false],
     ['cn', false],
     ['development', false],
-    ['global', true]
+    ['development', true]
   ] as const)('reconstructs using %s feed settings and verifies integrity (corrupt: %s)', async (edition, corrupt) => {
     const directory = await mkdtemp(path.join(tmpdir(), 'cherry-differential-'))
     const oldContents = Buffer.from('AAAABBBBCCCCDDDD')
@@ -50,7 +50,6 @@ describe('native differential downloads', () => {
       await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
       const address = server.address()
       if (!address || typeof address === 'string') throw new Error('Missing test server address')
-      const config = parse(await readFile(path.join(projectRoot, 'electron-builder.yml'), 'utf8'))
       const feed =
         edition === 'cn'
           ? (
@@ -58,9 +57,7 @@ describe('native differential downloads', () => {
                 packageMetadata: { value: { version: '2.2.0-rc.1' } }
               })
             ).publish
-          : edition === 'development'
-            ? parse(await readFile(path.join(projectRoot, 'dev-app-update.yml'), 'utf8'))
-            : config.publish
+          : parse(await readFile(path.join(projectRoot, 'dev-app-update.yml'), 'utf8'))
       const oldFile = path.join(directory, 'old.exe')
       const newFile = path.join(directory, 'new.exe')
       await writeFile(oldFile, oldContents)
