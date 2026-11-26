@@ -44,7 +44,7 @@ describe('FallbackFavicon', () => {
       const second = render(<FallbackFavicon hostname={hostname} alt="" />)
 
       first.unmount()
-      expect(signals).toHaveLength(4)
+      expect(signals).toHaveLength(1)
       expect(signals.every((signal) => !signal.aborted)).toBe(true)
       if (!keepConsumer) second.unmount()
 
@@ -52,7 +52,7 @@ describe('FallbackFavicon', () => {
 
       expect(signals.every((signal) => signal.aborted)).toBe(true)
       if (keepConsumer) {
-        expect(second.container.querySelector('img')).toHaveAttribute('src', `https://icon.horse/icon/${hostname}`)
+        expect(second.container.querySelector('img')).toHaveAttribute('src', `https://${hostname}/favicon.ico`)
         second.unmount()
       }
     }
@@ -69,8 +69,8 @@ describe('FallbackFavicon', () => {
 
     await waitFor(() => expect(container.querySelectorAll('img')).toHaveLength(2))
 
-    // Four candidate sources, one round of HEAD probes — not one round per mounted icon.
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    // One candidate source, one HEAD probe — not one probe per mounted icon.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
     const sources = [...container.querySelectorAll('img')].map((image) => image.getAttribute('src'))
     expect(sources[0]).toBe(sources[1])
   })
@@ -106,36 +106,20 @@ describe('FallbackFavicon', () => {
     expect(container.querySelector('img')).not.toBeInTheDocument()
   })
 
-  it('re-probes after the cached source fails, instead of reusing the broken source', async () => {
+  // Privacy edition contract: the linked site is the only host ever asked for its icon, also
+  // after that icon failed to load. Upstream then turned to third-party favicon services.
+  it('asks no other host after the site icon fails', async () => {
     const hostname = 'stale-cache.example'
     const first = render(<FallbackFavicon hostname={hostname} alt="" />)
     const image = await findFaviconImage(first.container, hostname)
     fireEvent.error(image)
     first.unmount()
 
-    fetchMock.mockClear()
     const second = render(<FallbackFavicon hostname={hostname} alt="" />)
+    const retriedImage = await findFaviconImage(second.container, hostname)
 
-    const recoveredImage = await findFaviconImage(second.container, hostname)
-    expect(recoveredImage).toHaveAttribute('src', `https://favicon.splitbee.io/?url=${hostname}`)
-  })
-
-  it('recovers through another provider after an offline mount and image failure', async () => {
-    const hostname = 'offline-recovery.example'
-    fetchMock.mockRejectedValue(new TypeError('Failed to fetch'))
-    const first = render(<FallbackFavicon hostname={hostname} alt="" />)
-    const image = await findFaviconImage(first.container, hostname)
-    fireEvent.error(image)
-    first.unmount()
-
-    fetchMock.mockImplementation(async (url: string) => ({
-      ok: url.startsWith('https://favicon.splitbee.io/'),
-      status: url.startsWith('https://favicon.splitbee.io/') ? 200 : 503
-    }))
-    const second = render(<FallbackFavicon hostname={hostname} alt="" />)
-
-    const recoveredImage = await findFaviconImage(second.container, hostname)
-    expect(recoveredImage).toHaveAttribute('src', `https://favicon.splitbee.io/?url=${hostname}`)
+    const probedHosts = fetchMock.mock.calls.map(([url]) => new URL(url as string).hostname)
+    expect(new Set([...probedHosts, new URL(retriedImage.src).hostname])).toEqual(new Set([hostname]))
   })
 
   it('falls back to the hostname initial when the icon cannot load', async () => {
