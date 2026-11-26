@@ -1,9 +1,9 @@
-import { usePreference } from '@data/hooks/usePreference'
-import { LATEST_PRIVACY_POLICY_VERSION } from '@shared/utils/constants'
-
-/** Whether the user must acknowledge the latest privacy policy before continuing. */
+/**
+ * Whether the user must acknowledge the latest privacy policy before continuing.
+ *
+ * Privacy edition: never. Nothing is collected, so there is no data-collection policy
+ * to accept, whatever a profile carried over from an upstream build has stored.
+ */
 export function useIsPrivacyUpdateRequired(): boolean {
-  const [policyVersion] = usePreference('app.privacy.policy_version')
-  const [dataCollectionEnabled] = usePreference('app.privacy.data_collection.enabled')
-  return dataCollectionEnabled && policyVersion !== LATEST_PRIVACY_POLICY_VERSION
+  return false
 }
