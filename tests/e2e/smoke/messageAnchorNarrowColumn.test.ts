@@ -47,7 +47,7 @@ test('anchor rail stays visible and navigates to the first turn in a narrow mess
   await electronApp.evaluate(
     ({ BrowserWindow }, size) => {
       BrowserWindow.getAllWindows()
-        .find((window) => window.getTitle() === 'Cherry Studio')
+        .find((window) => window.getTitle() === 'Cherry Studio PE')
         ?.setSize(size.width, size.height)
     },
     { width: 900, height: 700 }

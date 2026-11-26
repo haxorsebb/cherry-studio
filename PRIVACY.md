@@ -2,7 +2,7 @@
 
 > **Privacy edition notice**
 >
-> This repository is a fork of Cherry Studio, the "Privacy edition". The policy below is the upstream project's policy for upstream builds and services. The maintainers of this fork operate none of those services, and builds made from this repository behave differently:
+> This repository is Cherry Studio PE, the Privacy edition, a fork of Cherry Studio. The policy below is the upstream project's policy for upstream builds and services. The maintainers of this fork operate none of those services, and builds made from this repository behave differently:
 >
 > - **No telemetry.** No usage analytics and no crash reports are sent. Sections I(1) and I(2) do not apply, and there is no setting to switch off.
 > - **No background contact with vendor servers.** No update checks, announcements, model catalog downloads or IP-based region lookup.

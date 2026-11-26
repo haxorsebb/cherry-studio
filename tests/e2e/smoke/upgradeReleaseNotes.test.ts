@@ -38,7 +38,7 @@ async function saveWindowScreenshot(app: ElectronApplication, page: Page, filena
     )
   })
   const png = await app.evaluate(async ({ BrowserWindow }) => {
-    const window = BrowserWindow.getAllWindows().find((candidate) => candidate.getTitle() === 'Cherry Studio')!
+    const window = BrowserWindow.getAllWindows().find((candidate) => candidate.getTitle() === 'Cherry Studio PE')!
     return (await window.webContents.capturePage()).toPNG().toString('base64')
   })
   await writeFile(filename, Buffer.from(png, 'base64'))
@@ -91,7 +91,7 @@ test('shows a collapsed version timeline for the upgrade range in About and the 
   }
   await electronApp.evaluate(
     ({ BrowserWindow }, { channel, info }) => {
-      const window = BrowserWindow.getAllWindows().find((candidate) => candidate.getTitle() === 'Cherry Studio')!
+      const window = BrowserWindow.getAllWindows().find((candidate) => candidate.getTitle() === 'Cherry Studio PE')!
       window.webContents.send(channel, 'app.updater.available', info)
       window.webContents.send(channel, 'app.updater.downloaded', info)
     },
@@ -195,7 +195,7 @@ test('shows a collapsed version timeline for the upgrade range in About and the 
   await expect(mainWindow.getByRole('dialog').getByText('中间版本功能')).toBeVisible()
 
   await electronApp.evaluate(({ BrowserWindow }) => {
-    const window = BrowserWindow.getAllWindows().find((candidate) => candidate.getTitle() === 'Cherry Studio')!
+    const window = BrowserWindow.getAllWindows().find((candidate) => candidate.getTitle() === 'Cherry Studio PE')!
     window.setSize(1000, 900)
     window.webContents.setZoomFactor(2)
   })

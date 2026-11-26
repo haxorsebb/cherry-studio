@@ -33,7 +33,7 @@
 </div>
 
 > [!IMPORTANT]
-> **This is the Privacy edition, a fork of [Cherry Studio](https://github.com/CherryHQ/cherry-studio).** It is built to send nothing unless you cause it: no telemetry, update checks, announcements, IP lookup or hosted default model, and only local model providers are pre-configured. [PRIVACY.md](./PRIVACY.md) lists what changed and what can still leave your device.
+> **This is Cherry Studio PE, the Privacy edition, a fork of [Cherry Studio](https://github.com/CherryHQ/cherry-studio).** It is built to send nothing unless you cause it: no telemetry, update checks, announcements, IP lookup or hosted default model, and only local model providers are pre-configured. [PRIVACY.md](./PRIVACY.md) lists what changed and what can still leave your device.
 >
 > The download links, mobile apps and documentation below belong to the upstream project and describe upstream builds. This edition has no update channel; build it from source with `pnpm install` and `pnpm build:linux:x64` (see [Development](./docs/dev/contrib/development.md)).
 
