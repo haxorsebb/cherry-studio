@@ -44,6 +44,9 @@ async function saveWindowScreenshot(app: ElectronApplication, page: Page, filena
   await writeFile(filename, Buffer.from(png, 'base64'))
 }
 
+// Privacy edition: updates are switched off, so About never offers an upgrade or its release notes.
+test.skip(true, 'Updates are switched off in the Privacy edition')
+
 test('shows a collapsed version timeline for the upgrade range in About and the install dialog, including failure and retry', async ({
   electronApp,
   mainWindow
