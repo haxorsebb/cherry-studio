@@ -51,6 +51,9 @@ export function UserAccountPanel({
     isAuthorizing
   } = useCherryAccountSession()
   const isGlobalEdition = getAppEdition() === 'global'
+  // Privacy edition: Cherry Cloud is offline, so the subscription row and the cloud
+  // sign-in/sign-out action are never rendered.
+  const cherryCloudAvailable = false
   const showSubscribeDot = useCherryCloudSubscribeReminder()
   const isCloudSignedIn = cloudStatus?.phase === 'signed-in'
 
@@ -227,7 +230,7 @@ export function UserAccountPanel({
         </Button>
       </ColFlex>
       <ColFlex className="border-border-subtle gap-0.5 border-t py-1">
-        {activePaidPlan ? (
+        {!cherryCloudAvailable ? null : activePaidPlan ? (
           <HoverCard openDelay={150} closeDelay={120}>
             <HoverCardTrigger asChild>{subscriptionRow}</HoverCardTrigger>
             <HoverCardContent side="right" align="start" sideOffset={8} className="w-64">
@@ -257,7 +260,7 @@ export function UserAccountPanel({
         />
         <AppearanceMenu onRequestClose={onRequestClose} />
         {children}
-        {cloudHeaderAction ? (
+        {cherryCloudAvailable && cloudHeaderAction ? (
           <Button
             type="button"
             className="h-8 min-h-8 w-full justify-start gap-2 rounded-md bg-transparent px-2 py-0 text-[13px] text-foreground leading-5"
