@@ -189,7 +189,7 @@ export class AppUpdaterService extends BaseService {
 
     // Development builds skip automatic checks but still support manual checks.
     // Portable builds do not perform update checks.
-    if (!app.isPackaged || this.isPortable()) {
+    if (!app.isPackaged || this.updatesUnsupported()) {
       return
     }
     this.scheduleNextUpdateCheck(INITIAL_CHECK_DELAY_MS)
@@ -324,6 +324,7 @@ export class AppUpdaterService extends BaseService {
   }
 
   private async fetchReleaseHistory(): Promise<ReleaseNotesEntry[] | null> {
+    if (this.updatesUnsupported()) return null
     try {
       const { updateHeaders } = await this.getUpdateRequest()
       const response = await net.fetch(RELEASE_HISTORY_URL, {
@@ -358,7 +359,7 @@ export class AppUpdaterService extends BaseService {
     | { status: 'current'; currentVersion: string }
     | { status: 'available'; currentVersion: string; version: string }
   > {
-    if (this.isPortable()) return { status: 'unsupported' }
+    if (this.updatesUnsupported()) return { status: 'unsupported' }
     const { currentVersion, updateChannel, updateHeaders } = await this.getUpdateRequest()
     const updater = new ReleaseNotesUpdater()
     updater.logger = logger as Logger
@@ -376,6 +377,7 @@ export class AppUpdaterService extends BaseService {
   }
 
   public async getLatestReleaseNotes(): Promise<ReleaseNotesEntry | null> {
+    if (this.updatesUnsupported()) return null
     try {
       const { updateChannel, updateHeaders } = await this.getUpdateRequest()
       const updater = new ReleaseNotesUpdater()
@@ -442,8 +444,12 @@ export class AppUpdaterService extends BaseService {
     }
   }
 
-  private isPortable(): boolean {
-    return isWin && 'PORTABLE_EXECUTABLE_DIR' in process.env
+  /**
+   * Privacy edition: always true, so the release server is never contacted. Upstream returned
+   * true only for Windows portable builds; every caller already treats that as "no updates".
+   */
+  private updatesUnsupported(): boolean {
+    return true
   }
 
   /**
@@ -457,7 +463,7 @@ export class AppUpdaterService extends BaseService {
   private async performUpdateCheck() {
     void application.get('AnalyticsService').trackAppUpdate()
 
-    if (this.isPortable()) {
+    if (this.updatesUnsupported()) {
       return {
         currentVersion: app.getVersion(),
         updateInfo: null

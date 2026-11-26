@@ -45,6 +45,8 @@ const AboutSettings: FC = () => {
   const [testChannel, setTestChannel] = usePreference('app.dist.test_plan.channel')
 
   const [version, setVersion] = useState('')
+  // Privacy edition: the main process never checks for updates, so the update controls stay hidden.
+  const updatesSupported = false
   const [isPortable, setIsPortable] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const { t } = useTranslation()
@@ -211,7 +213,7 @@ const AboutSettings: FC = () => {
             </div>
           </div>
 
-          {!isPortable && (
+          {updatesSupported && !isPortable && (
             <div className="flex shrink-0 items-center justify-end">
               <Button
                 size="sm"
@@ -234,7 +236,7 @@ const AboutSettings: FC = () => {
           )}
         </div>
 
-        {!isPortable && (
+        {updatesSupported && !isPortable && (
           <>
             <Divider className="my-3" />
             <SettingRow id="setting-about-auto-check-update" className="scroll-mt-6 gap-3">

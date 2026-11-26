@@ -13,6 +13,8 @@ sources:
 
 ## Overview
 
+> **Privacy edition:** updates are disabled. `AppUpdaterService.updatesUnsupported()` always returns `true`, so there is no scheduled or manual update check and no release-history request, and the About page hides its update controls. The rest of this document describes the upstream mechanism, kept for reference when merging.
+
 Cherry Studio clients check for updates through the managed release service at `https://releases.cherry-ai.com`. The client selects an edition-specific update channel and sends application, edition, client, platform, and region metadata. The release service owns target-version selection, regional mirrors, rollout policy, and required upgrade gateways.
 
 The in-app release history follows the same managed path. Stable release preparation updates `resources/cherry-studio/release-history.json`, the release workflow publishes that generated file as a release asset, and clients fetch `/release-history.json` through the managed release service. The service selects GitHub or GitCode according to the request region. Each build also bundles the file as an offline fallback.

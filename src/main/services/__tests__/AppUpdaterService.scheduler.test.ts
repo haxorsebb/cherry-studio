@@ -90,7 +90,6 @@ vi.mock('@application', async () => {
 const SCHEDULE_ID = 'app-updater:auto-check'
 const INITIAL_DELAY = 5_000
 const INTERVAL = 4 * 60 * 60 * 1000
-const BACKOFF_FIRST = 5 * 60 * 1000
 
 const setPackaged = (value: boolean) => {
   ;(app as unknown as { isPackaged: boolean }).isPackaged = value
@@ -247,41 +246,6 @@ describe('AppUpdaterService — auto update-check scheduling', () => {
     expect(mockNotificationService.publish).toHaveBeenCalledTimes(2)
   })
 
-  it('skips the check while disabled but keeps the loop alive and resumes when re-enabled', async () => {
-    prefValues['app.dist.auto_update.enabled'] = false
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
-    await appUpdater._doAllReady()
-
-    await vi.advanceTimersByTimeAsync(INITIAL_DELAY)
-    expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled()
-    expect(scheduler.has(SCHEDULE_ID)).toBe(true)
-
-    prefValues['app.dist.auto_update.enabled'] = true
-    await vi.advanceTimersByTimeAsync(INTERVAL)
-    expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1)
-  })
-
-  it('backs off after a failed check and recovers normal cadence after a success', async () => {
-    vi.mocked(autoUpdater.checkForUpdates).mockRejectedValue(new Error('network'))
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
-    await appUpdater._doAllReady()
-
-    await vi.advanceTimersByTimeAsync(INITIAL_DELAY)
-    expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1) // #1 failed → backoff 5min
-
-    // Backoff (5min) is shorter than the 4h cadence; let #2 succeed.
-    vi.mocked(autoUpdater.checkForUpdates).mockResolvedValue(null)
-    await vi.advanceTimersByTimeAsync(BACKOFF_FIRST)
-    expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(2)
-
-    // After success the cadence resets to ~4h: another 5min must NOT fire a check.
-    await vi.advanceTimersByTimeAsync(BACKOFF_FIRST)
-    expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(2)
-
-    await vi.advanceTimersByTimeAsync(INTERVAL - BACKOFF_FIRST)
-    expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(3)
-  })
-
   it('does not schedule when the app is not packaged', async () => {
     setPackaged(false)
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
@@ -292,18 +256,13 @@ describe('AppUpdaterService — auto update-check scheduling', () => {
     expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled()
   })
 
-  it('unregisters the schedule on stop and stops checking', async () => {
+  // Privacy edition contract: even a packaged build never arms the automatic update check.
+  it('does not schedule in a packaged build either', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     await appUpdater._doAllReady()
 
-    await vi.advanceTimersByTimeAsync(INITIAL_DELAY)
-    expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1)
-    expect(scheduler.has(SCHEDULE_ID)).toBe(true)
-
-    await appUpdater._doStop()
     expect(scheduler.has(SCHEDULE_ID)).toBe(false)
-
-    await vi.advanceTimersByTimeAsync(INTERVAL * 2)
-    expect(autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(INITIAL_DELAY + INTERVAL)
+    expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled()
   })
 })
