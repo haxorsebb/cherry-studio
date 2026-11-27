@@ -40,6 +40,10 @@ export type DoctorSessionAction =
   | { readonly type: 'start-interaction'; readonly interaction: Exclude<DoctorInteraction, { kind: 'idle' }> }
   | { readonly type: 'finish-interaction'; readonly kind: DoctorInteraction['kind'] }
 
+// Privacy edition: nothing is uploaded to the vendor, so every "report a problem" entry point
+// opens the panel that saves the diagnostic archive locally instead of the upload form.
+const withoutUpload = (panel: DoctorPanel): DoctorPanel => (panel === 'report' ? 'export' : panel)
+
 export function createDoctorSession({
   initialPanel,
   initialDescription
@@ -48,7 +52,7 @@ export function createDoctorSession({
   readonly initialDescription?: string
 }): DoctorSessionState {
   return {
-    activePanel: initialPanel,
+    activePanel: withoutUpload(initialPanel),
     descriptionDraft: initialDescription ?? '',
     fixedCheckIds: [],
     relaunchRequired: false,
@@ -59,7 +63,7 @@ export function createDoctorSession({
 export function doctorSessionReducer(state: DoctorSessionState, action: DoctorSessionAction): DoctorSessionState {
   switch (action.type) {
     case 'set-panel':
-      return { ...state, activePanel: action.panel }
+      return { ...state, activePanel: withoutUpload(action.panel) }
     case 'set-description':
       return { ...state, descriptionDraft: action.description }
     case 'reveal-evidence': {

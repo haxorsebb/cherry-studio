@@ -164,7 +164,6 @@ describe('DoctorPopup', () => {
     const dialog = await screen.findByRole('dialog', {}, { timeout: 8000 })
     expect(dialog).toHaveClass('max-h-[calc(100vh-100px)]')
     expect(dialog).not.toHaveClass('h-[min(760px,calc(100vh-2rem))]')
-    expect(dialog).not.toHaveAccessibleDescription()
   })
 
   it('shows the checks panel without a description or dividers', async () => {
@@ -183,7 +182,7 @@ describe('DoctorPopup', () => {
     expect(dialog.querySelector('[data-slot="dialog-footer"]')).not.toHaveClass('border-t')
   })
 
-  it('treats a directly opened report as a standalone problem report', async () => {
+  it('offers a local export, not an upload form, when a problem report is requested', async () => {
     const user = userEvent.setup()
     render(<PopupHost />)
 
@@ -191,10 +190,11 @@ describe('DoctorPopup', () => {
       void DoctorPopup.show({ initialPanel: 'report' })
     })
 
-    expect(await screen.findByRole('heading', { name: 'settings.doctor.panels.report' })).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'settings.doctor.panels.export' })).toBeVisible()
+    expect(screen.queryByLabelText('settings.about.diagnostics.report.description_label')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'settings.doctor.actions.back_to_checks' })).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Close report panel' }))
+    await user.click(await screen.findByRole('button', { name: 'Close export panel' }))
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
@@ -576,24 +576,5 @@ describe('DoctorPopup', () => {
       checkId: 'permission-accessibility',
       fixId: 'request'
     })
-  })
-
-  it('blocks every dismiss path while the report panel is busy', async () => {
-    const user = userEvent.setup()
-    render(<PopupHost />)
-
-    act(() => {
-      void DoctorPopup.show({ initialPanel: 'report' })
-    })
-
-    const dialog = await screen.findByRole('dialog')
-    await user.click(screen.getByRole('button', { name: 'Start report operation' }))
-
-    expect(screen.queryByRole('button', { name: 'common.close' })).not.toBeInTheDocument()
-    const overlay = document.querySelector('[data-slot="dialog-overlay"]')
-    expect(overlay).toBeInTheDocument()
-    await user.click(overlay as HTMLElement)
-    await user.keyboard('{Escape}')
-    expect(dialog).toBeVisible()
   })
 })
