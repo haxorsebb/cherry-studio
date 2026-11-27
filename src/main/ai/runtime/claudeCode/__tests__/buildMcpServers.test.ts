@@ -199,10 +199,10 @@ describe('adjustAllowedToolsForMcp', () => {
   })
 
   it('removes an exact disabled tool without affecting sibling auto-approvals', () => {
-    const allowed = adjustAllowedToolsForMcp(WITHOUT_HOST_TOOLS, ['mcp__cherry-tools__web_fetch'])
+    const allowed = adjustAllowedToolsForMcp(WITHOUT_HOST_TOOLS, ['mcp__cherry-tools__cli_search'])
 
-    expect(allowed).not.toContain('mcp__cherry-tools__web_fetch')
-    expect(allowed).toContain('mcp__cherry-tools__web_search')
+    expect(allowed).not.toContain('mcp__cherry-tools__cli_search')
+    expect(allowed).toContain('mcp__cherry-tools__cli_list')
   })
 
   it.each(['mcp__cherry-tools', 'mcp__cherry-tools__*'])('removes server-wide disabled tools for %s', (rule) => {

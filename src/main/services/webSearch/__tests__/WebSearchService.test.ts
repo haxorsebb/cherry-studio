@@ -178,34 +178,20 @@ describe('WebSearchService', () => {
     webSearchService = new WebSearchService()
   })
 
-  it('discloses one fallback dispatch for a failed batch, even when it fails', async () => {
+  // Privacy edition contract: a failed keyword search is not sent to any other provider.
+  it('rejects a failed keyword search without contacting another provider', async () => {
+    const searchedWith: string[] = []
     createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) => ({
-      searchKeywords: (input: string) =>
-        provider.id === 'tavily'
-          ? Promise.reject(new Error('HTTP 401'))
-          : Promise.resolve(
-              response('exa-mcp', 'searchKeywords', input, [
-                { title: input, content: 'fallback', url: 'https://example.com' }
-              ])
-            )
+      searchKeywords: () => {
+        searchedWith.push(provider.id)
+        return Promise.reject(new Error('HTTP 401'))
+      }
     }))
-    const result = await webSearchService.searchKeywords({ keywords: ['one', 'two'] })
-    expect(result.results.map((item) => item.content)).toEqual(['fallback', 'fallback'])
-    expect(defaultServiceInstances.IpcApiService.broadcast.mock.calls).toEqual([
-      [
-        'web_search.fallback',
-        { primaryProviderId: 'tavily', fallbackProviderId: 'exa-mcp', capability: 'searchKeywords' }
-      ]
-    ])
-    vi.clearAllMocks()
-    createWebSearchProviderMock.mockReturnValue({ searchKeywords: () => Promise.reject(new Error('failed')) })
-    await expect(webSearchService.searchKeywords({ keywords: ['one'] })).rejects.toThrow()
-    expect(defaultServiceInstances.IpcApiService.broadcast.mock.calls).toEqual([
-      [
-        'web_search.fallback',
-        { primaryProviderId: 'tavily', fallbackProviderId: 'exa-mcp', capability: 'searchKeywords' }
-      ]
-    ])
+
+    await expect(webSearchService.searchKeywords({ keywords: ['one', 'two'] })).rejects.toThrow()
+
+    expect(new Set(searchedWith)).toEqual(new Set(['tavily']))
+    expect(defaultServiceInstances.IpcApiService.broadcast).not.toHaveBeenCalled()
   })
 
   it('uses the keyword default provider and returns service-owned response metadata', async () => {
@@ -298,28 +284,6 @@ describe('WebSearchService', () => {
     })
   })
 
-  it('skips an unconfigured keyword provider and runs every input through ExaMCP', async () => {
-    setWebSearchPreferences({ providerApiKeys: { tavily: [] } })
-    const tavilySearch = vi.fn()
-    const exaMcpSearch = vi.fn((input: string) =>
-      Promise.resolve(
-        response('exa-mcp', 'searchKeywords', input, [
-          { title: `Fallback ${input}`, content: 'exa', url: `https://exa.test/${input}` }
-        ])
-      )
-    )
-    createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) =>
-      provider.id === 'tavily' ? { searchKeywords: tavilySearch } : { searchKeywords: exaMcpSearch }
-    )
-
-    const result = await webSearchService.searchKeywords({ providerId: 'tavily', keywords: ['first', 'second'] })
-
-    expect(tavilySearch).not.toHaveBeenCalled()
-    expect(exaMcpSearch).toHaveBeenCalledTimes(2)
-    expect(result.providerId).toBe('exa-mcp')
-    expect(result.results.map(({ title }) => title)).toEqual(['Fallback first', 'Fallback second'])
-  })
-
   it('surfaces the selected provider configuration error when fallback is disabled', async () => {
     setWebSearchPreferences({ providerApiKeys: { tavily: [] } })
     const searchKeywords = vi.fn()
@@ -334,16 +298,11 @@ describe('WebSearchService', () => {
     expect(defaultServiceInstances.IpcApiService.broadcast).not.toHaveBeenCalled()
   })
 
-  it('surfaces a configuration error when the selected keyword provider and fallback are both misconfigured', async () => {
+  it('surfaces the configuration error of an unconfigured keyword provider', async () => {
     const overrides = MockMainPreferenceServiceUtils.getPreferenceValue('chat.web_search.provider_overrides')
     MockMainPreferenceServiceUtils.setPreferenceValue('chat.web_search.provider_overrides', {
       ...overrides,
-      tavily: { ...overrides.tavily, apiKeys: [] },
-      'exa-mcp': {
-        capabilities: {
-          searchKeywords: { apiHost: 'invalid-url' }
-        }
-      }
+      tavily: { ...overrides.tavily, apiKeys: [] }
     })
 
     await expect(webSearchService.searchKeywords({ providerId: 'tavily', keywords: ['first'] })).rejects.toMatchObject({
@@ -351,36 +310,6 @@ describe('WebSearchService', () => {
       code: 'api_key_missing'
     })
     expect(defaultServiceInstances.IpcApiService.broadcast).not.toHaveBeenCalled()
-  })
-
-  it('retries only failed keywords through ExaMCP and preserves input order', async () => {
-    const tavilySearch = vi.fn((input: string) =>
-      input === 'first'
-        ? Promise.resolve(
-            response('tavily', 'searchKeywords', input, [
-              { title: 'First', content: 'tavily', url: 'https://tavily.test/first' }
-            ])
-          )
-        : Promise.reject(new Error(`Tavily failed: ${input}`))
-    )
-    const exaMcpSearch = vi.fn((input: string) =>
-      Promise.resolve(
-        response('exa-mcp', 'searchKeywords', input, [
-          { title: 'Second', content: 'exa', url: 'https://exa.test/second' }
-        ])
-      )
-    )
-    createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) =>
-      provider.id === 'tavily' ? { searchKeywords: tavilySearch } : { searchKeywords: exaMcpSearch }
-    )
-
-    const result = await webSearchService.searchKeywords({ providerId: 'tavily', keywords: ['first', 'second'] })
-
-    expect(exaMcpSearch).toHaveBeenCalledOnce()
-    expect(exaMcpSearch).toHaveBeenCalledWith('second', expect.any(Object), undefined)
-    expect(result.providerId).toBe('exa-mcp')
-    expect(result.providerIds).toEqual(['tavily', 'exa-mcp'])
-    expect(result.results.map(({ title }) => title)).toEqual(['First', 'Second'])
   })
 
   it('does not start another fallback when ExaMCP itself fails', async () => {
@@ -424,32 +353,6 @@ describe('WebSearchService', () => {
     expect(defaultServiceInstances.IpcApiService.broadcast).not.toHaveBeenCalled()
   })
 
-  it('falls back when a provider input aborts without a caller-aborted signal', async () => {
-    const abortError = new DOMException('The operation was aborted', 'AbortError')
-    const tavilySearch = vi
-      .fn()
-      .mockResolvedValueOnce(
-        response('tavily', 'searchKeywords', 'first', [
-          { title: 'First', content: 'one', url: 'https://example.com/first' }
-        ])
-      )
-      .mockRejectedValueOnce(abortError)
-    const exaMcpSearch = vi
-      .fn()
-      .mockResolvedValue(
-        response('exa-mcp', 'searchKeywords', 'second', [
-          { title: 'Second', content: 'two', url: 'https://example.com/second' }
-        ])
-      )
-    createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) =>
-      provider.id === 'tavily' ? { searchKeywords: tavilySearch } : { searchKeywords: exaMcpSearch }
-    )
-
-    const result = await webSearchService.searchKeywords({ providerId: 'tavily', keywords: ['first', 'second'] })
-
-    expect(result.results.map(({ title }) => title)).toEqual(['First', 'Second'])
-  })
-
   it('logs service failures for abort errors when the caller did not abort', async () => {
     const abortError = new DOMException('The operation was aborted', 'AbortError')
     createWebSearchProviderMock.mockReturnValue({
@@ -458,25 +361,6 @@ describe('WebSearchService', () => {
 
     await expect(webSearchService.searchKeywords({ providerId: 'exa-mcp', keywords: ['first'] })).rejects.toBe(
       abortError
-    )
-  })
-
-  it('aggregates keyword provider failures when every fallback input fails', async () => {
-    const primaryError = new Error('network failed')
-    const fallbackError = new Error('ExaMCP failed')
-    createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) => ({
-      searchKeywords: vi.fn().mockRejectedValue(provider.id === 'tavily' ? primaryError : fallbackError)
-    }))
-
-    await expect(
-      webSearchService.searchKeywords({ providerId: 'tavily', keywords: ['first', 'second'] })
-    ).rejects.toSatisfy(
-      (error: unknown) =>
-        error instanceof AggregateError &&
-        error.message.includes('network failed') &&
-        error.message.includes('ExaMCP failed') &&
-        error.errors.includes(primaryError) &&
-        error.errors.includes(fallbackError)
     )
   })
 
@@ -632,69 +516,6 @@ describe('WebSearchService', () => {
     expect(result.results[0]?.title).toBe('Recovered')
   })
 
-  it('continues from a failed Cherry Fetch fallback to Jina', async () => {
-    const primaryError = new Error('Querit failed')
-    const fallbackError = new Error('Cherry Fetch failed')
-    const queritFetch = vi.fn().mockRejectedValue(primaryError)
-    const cherryFetch = vi.fn().mockRejectedValue(fallbackError)
-    const jinaFetch = vi
-      .fn()
-      .mockResolvedValue(
-        response('jina', 'fetchUrls', 'https://example.com/article', [
-          { title: 'Recovered', content: 'Jina content', url: 'https://example.com/article' }
-        ])
-      )
-    createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) => {
-      if (provider.id === 'querit') return { fetchUrls: queritFetch }
-      if (provider.id === 'fetch') return { fetchUrls: cherryFetch }
-      return { fetchUrls: jinaFetch }
-    })
-
-    const result = await webSearchService.fetchUrls({
-      providerId: 'querit',
-      urls: ['https://example.com/article']
-    })
-
-    expect(defaultServiceInstances.IpcApiService.broadcast.mock.calls).toEqual([
-      ['web_search.fallback', { primaryProviderId: 'querit', fallbackProviderId: 'fetch', capability: 'fetchUrls' }],
-      ['web_search.fallback', { primaryProviderId: 'querit', fallbackProviderId: 'jina', capability: 'fetchUrls' }]
-    ])
-    expect(jinaFetch).toHaveBeenCalledOnce()
-    expect(result.providerId).toBe('jina')
-    expect(result.results[0]?.title).toBe('Recovered')
-  })
-
-  it('falls back from native fetch to Jina after passing the failed hostname through the DNS guard', async () => {
-    const primaryError = new Error('native failed')
-    const nativeFetch = vi.fn().mockRejectedValue(primaryError)
-    const jinaFetch = vi
-      .fn()
-      .mockResolvedValue(
-        response('jina', 'fetchUrls', 'https://example.com/article', [
-          { title: 'Recovered', content: 'Jina content', url: 'https://example.com/article' }
-        ])
-      )
-    createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) =>
-      provider.id === 'fetch' ? { fetchUrls: nativeFetch } : { fetchUrls: jinaFetch }
-    )
-
-    const result = await webSearchService.fetchUrlsUnprocessed({ urls: ['https://fake-ip.example/article'] })
-
-    expect(resolveRemoteFetchUrlMock).toHaveBeenCalledWith('https://fake-ip.example/article', {
-      allowPrivateNetwork: false,
-      signal: undefined
-    })
-    expect(jinaFetch).toHaveBeenCalledWith('https://fake-ip.example/article', expect.any(Object), undefined)
-    expect(result.results).toEqual([
-      {
-        title: 'Recovered',
-        content: 'Jina content',
-        url: 'https://example.com/article',
-        sourceInput: 'https://fake-ip.example/article'
-      }
-    ])
-  })
-
   it('falls back from Jina to native fetch without repeating the Jina safety gate', async () => {
     const jinaFetch = vi.fn().mockRejectedValue(new Error('Jina failed'))
     const nativeFetch = vi
@@ -716,36 +537,37 @@ describe('WebSearchService', () => {
     expect(result.results).toHaveLength(1)
   })
 
-  it('retries only failed inputs and preserves the input result order', async () => {
-    const nativeFetch = vi.fn((input: string) => {
+  it('retries only failed inputs through the built-in fetch and preserves the input result order', async () => {
+    const jinaFetch = vi.fn((input: string) => {
       if (input === 'https://example.com/first') {
+        return Promise.resolve(response('jina', 'fetchUrls', input, [{ title: 'First', content: 'jina', url: input }]))
+      }
+
+      return Promise.reject(new Error(`Jina failed: ${input}`))
+    })
+    const nativeFetch = vi.fn((input: string) => {
+      if (input === 'https://example.com/second') {
         return Promise.resolve(
-          response('fetch', 'fetchUrls', input, [{ title: 'First', content: 'native', url: input }])
+          response('fetch', 'fetchUrls', input, [{ title: 'Second', content: 'native', url: input }])
         )
       }
 
       return Promise.reject(new Error(`native failed: ${input}`))
     })
-    const jinaFetch = vi.fn((input: string) => {
-      if (input === 'https://example.com/second') {
-        return Promise.resolve(response('jina', 'fetchUrls', input, [{ title: 'Second', content: 'jina', url: input }]))
-      }
-
-      return Promise.reject(new Error(`Jina failed: ${input}`))
-    })
     createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) =>
-      provider.id === 'fetch' ? { fetchUrls: nativeFetch } : { fetchUrls: jinaFetch }
+      provider.id === 'jina' ? { fetchUrls: jinaFetch } : { fetchUrls: nativeFetch }
     )
 
     const result = await webSearchService.fetchUrls({
+      providerId: 'jina',
       urls: ['https://example.com/first', 'https://example.com/second', 'https://example.com/third']
     })
 
-    expect(jinaFetch).toHaveBeenCalledTimes(2)
-    expect(jinaFetch).toHaveBeenNthCalledWith(1, 'https://example.com/second', expect.any(Object), undefined)
-    expect(jinaFetch).toHaveBeenNthCalledWith(2, 'https://example.com/third', expect.any(Object), undefined)
-    expect(result.providerId).toBe('jina')
-    expect(result.providerIds).toEqual(['fetch', 'jina'])
+    expect(nativeFetch).toHaveBeenCalledTimes(2)
+    expect(nativeFetch).toHaveBeenNthCalledWith(1, 'https://example.com/second', expect.any(Object), undefined)
+    expect(nativeFetch).toHaveBeenNthCalledWith(2, 'https://example.com/third', expect.any(Object), undefined)
+    expect(result.providerId).toBe('fetch')
+    expect(result.providerIds).toEqual(['jina', 'fetch'])
     expect(result.results.map(({ title }) => title)).toEqual(['First', 'Second'])
   })
 
@@ -808,15 +630,17 @@ describe('WebSearchService', () => {
   })
 
   it('retains primary and fallback diagnostics when both fetch providers fail', async () => {
-    const primaryError = new Error('native failed')
-    const fallbackError = new Error('Jina failed')
-    const nativeFetch = vi.fn().mockRejectedValue(primaryError)
-    const jinaFetch = vi.fn().mockRejectedValue(fallbackError)
+    const primaryError = new Error('Jina failed')
+    const fallbackError = new Error('native failed')
+    const jinaFetch = vi.fn().mockRejectedValue(primaryError)
+    const nativeFetch = vi.fn().mockRejectedValue(fallbackError)
     createWebSearchProviderMock.mockImplementation((provider: WebSearchProvider) =>
-      provider.id === 'fetch' ? { fetchUrls: nativeFetch } : { fetchUrls: jinaFetch }
+      provider.id === 'jina' ? { fetchUrls: jinaFetch } : { fetchUrls: nativeFetch }
     )
 
-    await expect(webSearchService.fetchUrls({ urls: ['https://example.com/article'] })).rejects.toSatisfy(
+    await expect(
+      webSearchService.fetchUrls({ providerId: 'jina', urls: ['https://example.com/article'] })
+    ).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof AggregateError &&
         error.cause === primaryError &&

@@ -15,7 +15,7 @@ by `CodeBlockView`. The current language mapping is:
 | Code language | Component | Renderer |
 |---|---|---|
 | `mermaid` | `MermaidPreview` | Merman (Rust Mermaid compiled to WASM) through `@cherrystudio/ui/mermaid` |
-| `plantuml` | `PlantUmlPreview` | Remote `www.plantuml.com` SVG endpoint |
+| `plantuml` | `PlantUmlPreview` | SVG endpoint of the user-configured PlantUML server |
 | `svg` | `SvgPreview` | Supplied SVG string |
 | `dot`, `graphviz` | `GraphvizPreview` | Lazily initialized `@viz-js/viz` instance |
 
@@ -111,7 +111,10 @@ the error.
 ### PlantUML
 
 `PlantUmlPreview` UTF-8 encodes and raw-deflates the diagram, applies PlantUML's
-custom base64 alphabet, and fetches SVG from the fixed public PlantUML server.
+custom base64 alphabet, and fetches SVG from the server in the
+`chat.code.preview.plantuml_server_url` preference (default `http://127.0.0.1:8080`).
+The diagram source is part of the request URL, so there is no public default; an
+empty preference fails the render without any request.
 It reports HTTP and network failures through the shared error state. There is no
 automatic retry, server selection, or server-health monitor.
 

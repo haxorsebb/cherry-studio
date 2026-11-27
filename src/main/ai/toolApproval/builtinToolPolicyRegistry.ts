@@ -88,8 +88,10 @@ function tool(
 const BUILTIN_TOOL_POLICIES = {
   automationJs: tool(CHERRY_MCP_SERVER.AUTOMATION, 'js', 'auto'),
   automationReset: tool(CHERRY_MCP_SERVER.AUTOMATION, 'reset', 'auto'),
-  cherryWebSearch: tool(CHERRY_MCP_SERVER.CHERRY_TOOLS, WEB_SEARCH_TOOL_NAME, 'auto'),
-  cherryWebFetch: tool(CHERRY_MCP_SERVER.CHERRY_TOOLS, WEB_FETCH_TOOL_NAME, 'auto'),
+  // Privacy edition: an Agent asks before it sends a query or URL of its choosing to the internet.
+  // Upstream pre-approves both. Full Access still lifts the prompt, as that is the user's choice.
+  cherryWebSearch: tool(CHERRY_MCP_SERVER.CHERRY_TOOLS, WEB_SEARCH_TOOL_NAME, 'required'),
+  cherryWebFetch: tool(CHERRY_MCP_SERVER.CHERRY_TOOLS, WEB_FETCH_TOOL_NAME, 'required'),
   cherryKnowledgeSearch: tool(CHERRY_MCP_SERVER.CHERRY_TOOLS, KB_SEARCH_TOOL_NAME, 'auto'),
   cherryKnowledgeRead: tool(CHERRY_MCP_SERVER.CHERRY_TOOLS, KB_READ_TOOL_NAME, 'auto'),
   cherryKnowledgeList: tool(CHERRY_MCP_SERVER.CHERRY_TOOLS, KB_LIST_TOOL_NAME, 'auto'),
@@ -120,7 +122,8 @@ const BUILTIN_TOOL_POLICIES = {
   listMcpSkills: tool(CHERRY_MCP_SERVER.SKILLS, 'list_mcp_skills', 'auto'),
   loadMcpSkill: tool(CHERRY_MCP_SERVER.SKILLS, 'load_mcp_skill', 'required'),
   readMcpSkillFile: tool(CHERRY_MCP_SERVER.SKILLS, 'read_mcp_skill_file', 'required'),
-  searchSkills: tool(CHERRY_MCP_SERVER.SKILLS, 'search_skills', 'auto'),
+  // Privacy edition: asks first, because the query goes to three public skill registries.
+  searchSkills: tool(CHERRY_MCP_SERVER.SKILLS, 'search_skills', 'required'),
   // Installs third-party skill code: only bypassPermissions may skip the prompt, Pi's auto mode included.
   installSkill: tool(CHERRY_MCP_SERVER.SKILLS, 'install_skill', 'required'),
   // A stdio install launches an arbitrary local command with the caller's env, so this asks per call

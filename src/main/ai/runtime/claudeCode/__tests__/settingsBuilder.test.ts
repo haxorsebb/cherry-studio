@@ -1842,7 +1842,7 @@ describe('buildClaudeCodeSessionSettings', () => {
   })
 
   it('does not auto-approve disabled MCP tools', async () => {
-    const disabledTools = ['mcp__cherry-tools__web_fetch', 'mcp__agent-memory__memory']
+    const disabledTools = ['mcp__cherry-tools__cli_search', 'mcp__agent-memory__memory']
     mocks.getAgent.mockReturnValue({
       id: 'agent-1',
       type: 'claude-code',
@@ -1862,7 +1862,7 @@ describe('buildClaudeCodeSessionSettings', () => {
 
     expect(settings.disallowedTools).toEqual(expect.arrayContaining(disabledTools))
     for (const toolName of disabledTools) expect(settings.allowedTools).not.toContain(toolName)
-    expect(settings.allowedTools).toContain('mcp__cherry-tools__web_search')
+    expect(settings.allowedTools).toContain('mcp__cherry-tools__cli_list')
   })
 
   // The kb_* tools are exposed from the resolved scope, so an unbound Agent still gets them from the

@@ -29,7 +29,7 @@ const test = base.extend<{ stickyProfile: { profile: string; notesPath: string }
     const previous = process.env.CS_DEV_PROFILE_ROOT
     process.env.CS_DEV_PROFILE_ROOT = profile
     try {
-      const binaryDirectory = join(profile, '.cherrystudio', 'bin')
+      const binaryDirectory = join(profile, '.cherrystudio-pe', 'bin')
       const ripgrepDestination = join(binaryDirectory, process.platform === 'win32' ? 'rg.exe' : 'rg')
       try {
         accessSync(ripgrepSource, constants.R_OK | constants.X_OK)

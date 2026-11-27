@@ -248,9 +248,8 @@ export class ClaudeCodeBinaryService extends BaseService {
     }
   }
 
-  protected onAllReady(): void {
-    this.ensure()
-  }
+  // Privacy edition: no download at startup. The runtime is fetched only when a
+  // Claude Code agent is first used, through ensure() / ensureExecutable().
 
   protected async onStop(): Promise<void> {
     this.controller?.abort()

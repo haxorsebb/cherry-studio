@@ -21,9 +21,11 @@ const CHECKING_DELAY_MS = 200
 
 export function ClaudeCodeDownloadStatus({
   status,
+  onDownload,
   onRetry
 }: {
   status?: ClaudeCodeBinaryStatus
+  onDownload: () => void
   onRetry: () => void
 }) {
   const { t } = useTranslation()
@@ -44,6 +46,8 @@ export function ClaudeCodeDownloadStatus({
     ? Math.min(100, Math.floor((status.receivedBytes / status.totalBytes) * 100))
     : undefined
   const phase = status?.phase ?? 'missing'
+  // Privacy edition: a missing runtime is never fetched automatically; the user starts it.
+  const awaitingDownload = status?.phase === 'missing'
   return (
     <NarrowLayout
       narrowMode={narrowMode}
@@ -54,6 +58,7 @@ export function ClaudeCodeDownloadStatus({
         role="status"
         aria-live="polite">
         {phase !== 'error' &&
+          !awaitingDownload &&
           (phase === 'downloading' && percent !== undefined ? (
             <div
               role="progressbar"
@@ -75,7 +80,9 @@ export function ClaudeCodeDownloadStatus({
                 ? t('agent.runtime_download.installing')
                 : phase === 'downloading'
                   ? t('agent.runtime_download.downloading')
-                  : t('agent.runtime_download.preparing')}
+                  : awaitingDownload
+                    ? t('agent.runtime_download.missing')
+                    : t('agent.runtime_download.preparing')}
             {phase === 'downloading' && (
               <span>
                 {' '}
@@ -85,6 +92,11 @@ export function ClaudeCodeDownloadStatus({
             )}
           </div>
         </div>
+        {awaitingDownload && (
+          <Button variant="outline" size="sm" onClick={onDownload}>
+            {t('common.download')}
+          </Button>
+        )}
         {phase === 'error' && status?.error !== 'unsupported' && (
           <Button variant="outline" size="sm" onClick={onRetry}>
             {t('common.retry')}

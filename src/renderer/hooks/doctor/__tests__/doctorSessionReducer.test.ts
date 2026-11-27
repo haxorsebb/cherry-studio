@@ -77,6 +77,16 @@ describe('doctorSessionReducer', () => {
     expect(state.descriptionDraft).toBe('reviewed draft')
   })
 
+  it('opens the local export panel whenever the report panel is requested', () => {
+    expect(createDoctorSession({ initialPanel: 'report' }).activePanel).toBe('export')
+
+    const switched = doctorSessionReducer(createDoctorSession({ initialPanel: 'checks' }), {
+      type: 'set-panel',
+      panel: 'report'
+    })
+    expect(switched.activePanel).toBe('export')
+  })
+
   it('records each successfully fixed check once', () => {
     const initial = createDoctorSession({ initialPanel: 'checks' })
     const fixed = doctorSessionReducer(initial, {

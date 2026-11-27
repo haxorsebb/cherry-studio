@@ -63,6 +63,11 @@ export const entries: SettingsSearchEntry[] = [
     groupKey: 'chat.settings.code_execution.title'
   },
   {
+    anchorId: 'plantuml-server',
+    titleKey: 'chat.settings.plantuml_server.label',
+    groupKey: 'chat.settings.code_execution.title'
+  },
+  {
     anchorId: 'custom-css',
     titleKey: 'settings.display.custom.css.label',
     groupKey: 'settings.display.custom.css.label',

@@ -2,7 +2,7 @@ import { caseDefinition } from '../../../../scripts/e2e/regression/cases'
 import { expect, test } from '../fixture'
 
 test(...caseDefinition('S-01'), async ({ mainWindow: page }) => {
-  await expect(page).toHaveTitle('Cherry Studio')
+  await expect(page).toHaveTitle('Cherry Studio PE')
   await expect(page.locator('#root')).toBeVisible()
   await expect.poll(async () => (await page.locator('body').innerText()).trim().length).toBeGreaterThan(0)
   await expect(page.locator('#app-sidebar, [data-ui~="app.onboarding-page"]').first()).toBeVisible()

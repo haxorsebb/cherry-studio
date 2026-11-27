@@ -32,6 +32,11 @@
  <a href="https://www.producthunt.com/posts/cherry-studio?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-cherry&#0045;studio" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=496640&theme=light" alt="Cherry&#0032;Studio - AI&#0032;Chatbots&#0044;&#0032;AI&#0032;Desktop&#0032;Client | Product Hunt" width="220" height="55" /></a>
 </div>
 
+> [!IMPORTANT]
+> **This is Cherry Studio PE, the Privacy edition, a fork of [Cherry Studio](https://github.com/CherryHQ/cherry-studio).** It is built to send nothing unless you cause it: no telemetry, update checks, announcements, IP lookup or hosted default model, and only local model providers are pre-configured. [PRIVACY.md](./PRIVACY.md) lists what changed and what can still leave your device.
+>
+> The download links, mobile apps and documentation below belong to the upstream project and describe upstream builds. This edition has no update channel; build it from source with `pnpm install` and `pnpm build:linux:x64` (see [Development](./docs/dev/contrib/development.md)).
+
 # 🍒 Cherry Studio
 
 Cherry Studio is an AI workstation for Windows, macOS, and Linux. Chat with multiple models, work with agents, build knowledge bases, create images, and automate everyday tasks in one place.

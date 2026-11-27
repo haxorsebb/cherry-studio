@@ -18,7 +18,9 @@ import path from 'node:path'
 
 import { app } from 'electron'
 
-export const CHERRY_HOME_DIRNAME = '.cherrystudio'
+// Privacy edition: its own folder, so downloaded tools, MCP tokens and the boot config
+// are never shared with an upstream build installed for the same user.
+export const CHERRY_HOME_DIRNAME = '.cherrystudio-pe'
 
 function resolveDevProfileRoot(): string | undefined {
   if (app.isPackaged) return undefined

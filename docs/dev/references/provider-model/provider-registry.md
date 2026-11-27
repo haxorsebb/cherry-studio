@@ -52,15 +52,21 @@ DbService.onInit()
     → PresetProviderSeeder.run(db)
       → RegistryLoader.loadProviders()     // reads providers.json
       → SELECT existing provider IDs from user_provider
-      → INSERT only new provider identity/auth rows
+      → INSERT only new identity rows for local presets
       → Never materialize registry-owned connection config
 ```
 
 `SeedRunner` reruns this seeder when the `providers.json` version changes, but
 the seeder remains insert-only: an existing provider row is skipped. This is
 safe because registry-owned connection config is not seeded into the row; it is
-resolved from the current registry on every read. The row contains identity,
-the user-owned display name, and any required auth shell.
+resolved from the current registry on every read. The row contains identity
+and the user-owned display name.
+
+Privacy edition: the seeder inserts only the presets listed in
+`LOCAL_PRESET_PROVIDER_IDS` (servers on the user's own machine or network), so
+cloud presets stay in `providers.json` but never reach the database.
+`LocalDefaultProviderSeeder` adds one custom OpenAI-compatible provider at
+`http://127.0.0.1:9000`; no model and no default-model preference is seeded.
 
 Canonical preset providers cannot be deleted by users. Most have
 `providerId === presetProviderId`; aliases/grouped presets are also protected

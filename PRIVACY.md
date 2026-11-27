@@ -1,5 +1,21 @@
 # Cherry Studio Privacy Policy
 
+> **Privacy edition notice**
+>
+> This repository is Cherry Studio PE, the Privacy edition, a fork of Cherry Studio. The policy below is the upstream project's policy for upstream builds and services. The maintainers of this fork operate none of those services, and builds made from this repository behave differently:
+>
+> - **No telemetry.** No usage analytics and no crash reports are sent. Sections I(1) and I(2) do not apply, and there is no setting to switch off.
+> - **No background contact with vendor servers.** No update checks, announcements, model catalog downloads or IP-based region lookup.
+> - **No hosted models or accounts.** The Built-in Model Services of Section IV and Cherry accounts are not available. Cloud provider presets are not offered; the only pre-configured model provider is a local server at `http://127.0.0.1:9000`.
+> - **Local rendering and lookups.** PlantUML diagrams go to the server you configure (default `http://127.0.0.1:8080`), link icons are requested from the linked site only, and spell-check dictionaries are downloaded only after you switch spell check on.
+> - **No silent rerouting.** A failed web search or page fetch is never passed on to another search vendor.
+> - **Agents ask before going online.** An agent asks you before each web search, page fetch or search of the public skill registries, unless you run it with Full Access.
+> - **No diagnostics upload.** "Report a problem" saves the diagnostic bundle as a local file instead of sending it to the upstream support server, and System Doctor probes no vendor server.
+>
+> What can still leave your device is what you cause yourself: requests to the model providers, search providers (DuckDuckGo by default, once you enable web search in a chat or approve an agent's request), MCP servers, backup targets and other services you configure; web pages, link previews and images referenced by chat content or opened in mini apps; and downloads you start, such as the agent runtime, local models and tools. Sections V to VII describe such third-party services and still apply.
+>
+> This notice describes how the software behaves. It is not legal advice, and it is a best-effort edition, not a guarantee. Questions about this fork belong in this repository's issue tracker, not at the upstream contact address in Section IX.
+
 **Updated Date:** August 20, 2026
 
 **Effective Date:** August 20, 2026

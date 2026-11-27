@@ -6,12 +6,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { agentTable } from '@data/db/schemas/agent'
 import { agentSessionTable } from '@data/db/schemas/agentSession'
 import { agentWorkspaceTable } from '@data/db/schemas/agentWorkspace'
-import { CherryAiDefaultModelSeeder } from '@data/db/seeding/seeders/cherryaiDefaultModelSeeder'
+import { userModelTable } from '@data/db/schemas/userModel'
+import { userProviderTable } from '@data/db/schemas/userProvider'
 import { CherryAssistantSeeder } from '@data/db/seeding/seeders/cherryAssistantSeeder'
 import { CherrySupportSeeder } from '@data/db/seeding/seeders/cherrySupportSeeder'
 import { BUILTIN_AGENT_ROLE, CHERRY_SUPPORT_AGENT_ID } from '@shared/ai/builtinAgent'
 import { AGENT_WORKSPACE_TYPE } from '@shared/data/api/schemas/agentWorkspaces'
-import { CHERRYAI_DEFAULT_UNIQUE_MODEL_ID } from '@shared/data/presets/cherryai'
+import { createUniqueModelId } from '@shared/data/types/model'
 
 function builtinAgents(db: ReturnType<typeof setupTestDatabase>['db'], role: string) {
   return db
@@ -29,21 +30,34 @@ describe('CherrySupportSeeder', () => {
   })
 
   it('creates Cherry Support beside Cherry Assistant with a system session and copied model', () => {
-    new CherryAiDefaultModelSeeder().run(dbh.db)
+    // The agent model column references user_model, so the copied model must really exist.
+    const modelId = createUniqueModelId('ollama', 'qwen')
+    dbh.db.insert(userProviderTable).values({ providerId: 'ollama', name: 'Ollama', orderKey: 'a0' }).run()
+    dbh.db
+      .insert(userModelTable)
+      .values({
+        id: modelId,
+        providerId: 'ollama',
+        modelId: 'qwen',
+        presetModelId: null,
+        name: 'Qwen',
+        capabilities: [],
+        supportsStreaming: true,
+        isEnabled: true,
+        isHidden: false,
+        orderKey: 'a0'
+      })
+      .run()
     new CherryAssistantSeeder().run(dbh.db)
     const [assistant] = builtinAgents(dbh.db, BUILTIN_AGENT_ROLE.ASSISTANT)
-    dbh.db
-      .update(agentTable)
-      .set({ model: CHERRYAI_DEFAULT_UNIQUE_MODEL_ID })
-      .where(eq(agentTable.id, assistant.id))
-      .run()
+    dbh.db.update(agentTable).set({ model: modelId }).where(eq(agentTable.id, assistant.id)).run()
 
     new CherrySupportSeeder().run(dbh.db)
 
     const [support] = builtinAgents(dbh.db, BUILTIN_AGENT_ROLE.SUPPORT)
     expect(support).toMatchObject({
       id: CHERRY_SUPPORT_AGENT_ID,
-      model: CHERRYAI_DEFAULT_UNIQUE_MODEL_ID
+      model: modelId
     })
     expect(support.configuration).toMatchObject({
       builtin_role: BUILTIN_AGENT_ROLE.SUPPORT

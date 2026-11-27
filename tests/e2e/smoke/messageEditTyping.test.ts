@@ -1,3 +1,4 @@
+import { createUniqueModelId } from '../../../src/shared/data/types/model'
 import { expect, test } from './fixtures/electron.fixture'
 
 test('typing immediately after editing an assistant message preserves every character', async ({
@@ -11,40 +12,68 @@ test('typing immediately after editing an assistant message preserves every char
       'app.privacy.policy_version': '20260820'
     })
   })
-  const seeded = await page.evaluate(async (text) => {
-    const assistant = await window.api.dataApi.request({
-      id: crypto.randomUUID(),
-      method: 'POST',
-      path: '/assistants',
-      body: { name: 'Edit typing' }
-    })
-    if (assistant.error) throw new Error(assistant.error.message)
-    const topic = await window.api.dataApi.request({
-      id: crypto.randomUUID(),
-      method: 'POST',
-      path: '/topics',
-      body: { name: 'Edit typing', assistantId: (assistant.data as { id: string }).id }
-    })
-    if (topic.error) throw new Error(topic.error.message)
-    const id = (topic.data as { id: string }).id
-    const reply = await window.api.dataApi.request({
-      id: crypto.randomUUID(),
-      method: 'POST',
-      path: `/topics/${id}/messages`,
-      body: {
-        role: 'assistant',
-        status: 'success',
-        data: {
-          parts: [
-            { type: 'reasoning', text: 'Reasoning for the reply.' },
-            { type: 'text', text }
-          ]
+  // Privacy edition: there is no hosted default model, and Send stays disabled without one.
+  const providerId = `edit-typing-${Date.now()}`
+  const modelId = 'edit-typing-model'
+  const seeded = await page.evaluate(
+    async ({ text, providerId, modelId, uniqueModelId }) => {
+      const setup = [
+        {
+          method: 'POST' as const,
+          path: '/providers',
+          body: {
+            providerId,
+            name: 'Edit typing',
+            defaultChatEndpoint: 'openai-chat-completions',
+            endpointConfigs: { 'openai-chat-completions': { baseUrl: 'http://127.0.0.1:9' } }
+          }
+        },
+        { method: 'PATCH' as const, path: `/providers/${providerId}`, body: { isEnabled: true } },
+        {
+          method: 'POST' as const,
+          path: '/models',
+          body: [{ providerId, modelId, endpointTypes: ['openai-chat-completions'] }]
         }
+      ]
+      for (const request of setup) {
+        const response = await window.api.dataApi.request({ id: crypto.randomUUID(), ...request })
+        if (response.error) throw new Error(response.error.message)
       }
-    })
-    if (reply.error) throw new Error(reply.error.message)
-    return { topicId: id, messageId: (reply.data as { id: string }).id }
-  }, original)
+      const assistant = await window.api.dataApi.request({
+        id: crypto.randomUUID(),
+        method: 'POST',
+        path: '/assistants',
+        body: { name: 'Edit typing', modelId: uniqueModelId }
+      })
+      if (assistant.error) throw new Error(assistant.error.message)
+      const topic = await window.api.dataApi.request({
+        id: crypto.randomUUID(),
+        method: 'POST',
+        path: '/topics',
+        body: { name: 'Edit typing', assistantId: (assistant.data as { id: string }).id }
+      })
+      if (topic.error) throw new Error(topic.error.message)
+      const id = (topic.data as { id: string }).id
+      const reply = await window.api.dataApi.request({
+        id: crypto.randomUUID(),
+        method: 'POST',
+        path: `/topics/${id}/messages`,
+        body: {
+          role: 'assistant',
+          status: 'success',
+          data: {
+            parts: [
+              { type: 'reasoning', text: 'Reasoning for the reply.' },
+              { type: 'text', text }
+            ]
+          }
+        }
+      })
+      if (reply.error) throw new Error(reply.error.message)
+      return { topicId: id, messageId: (reply.data as { id: string }).id }
+    },
+    { text: original, providerId, modelId, uniqueModelId: createUniqueModelId(providerId, modelId) }
+  )
   await page.reload()
   await page.waitForSelector('#root')
   await page.evaluate(

@@ -257,7 +257,7 @@ describe('useDoctorController', () => {
     )
   })
 
-  it('switches a report action to the report panel without copying Doctor results into the draft', async () => {
+  it('switches a report action to the local export panel without copying Doctor results into the draft', async () => {
     mocks.doctorState = { status: 'canceled', runId: 'run-1', selectedCheckIds: [] }
     const { result } = renderHook(() =>
       useDoctorController({
@@ -270,7 +270,7 @@ describe('useDoctorController', () => {
 
     await act(async () => result.current.executeAction('install-native-modules', { kind: 'report' }))
 
-    expect(result.current.session.activePanel).toBe('report')
+    expect(result.current.session.activePanel).toBe('export')
     expect(result.current.session.descriptionDraft).toBe('confirmed safe description')
     expect(mocks.request.mock.calls.some(([route]) => String(route).startsWith('diagnostics.bundle.'))).toBe(false)
   })

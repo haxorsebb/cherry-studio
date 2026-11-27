@@ -130,7 +130,7 @@ vi.mock('electron-updater', () => {
 })
 
 import { MockMainPreferenceServiceUtils } from '@test-mocks/main/PreferenceService'
-import { app, net } from 'electron'
+import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 
 import { application } from '@application'
@@ -164,71 +164,22 @@ describe('AppUpdaterService', () => {
     appUpdater = new AppUpdaterService()
   })
 
-  describe('upgrade release notes', () => {
-    const notes = '<!--LANG:en-->Notes<!--LANG:zh-CN-->说明<!--LANG:END-->'
+  // Privacy edition contract: no path through the updater reaches the release server.
+  describe('disabled updates', () => {
+    it('reports no update without asking the release server', async () => {
+      await expect(appUpdater.checkForUpdates()).resolves.toMatchObject({ updateInfo: null })
+      await expect(appUpdater.queryUpdateAvailability()).resolves.toEqual({ status: 'unsupported' })
 
-    it('returns only the requested upgrade range without checking or downloading another update', async () => {
-      vi.mocked(app.getVersion).mockReturnValue('2.1.8')
-      netFetchMock.mockResolvedValue(
-        new Response(
-          JSON.stringify(['2.1.8', '2.1.10', '2.1.11', '2.1.9'].map((version) => ({ version, releaseNotes: notes })))
-        )
-      )
-      await expect(appUpdater.getUpgradeReleaseNotes('2.1.10')).resolves.toEqual({
-        fromVersion: '2.1.8',
-        toVersion: '2.1.10',
-        historyStatus: 'available',
-        releases: [
-          { version: '2.1.10', releaseNotes: notes },
-          { version: '2.1.9', releaseNotes: notes }
-        ]
-      })
       expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled()
-      expect(autoUpdater.downloadUpdate).not.toHaveBeenCalled()
       expect(releaseNotesCheckMock).not.toHaveBeenCalled()
     })
 
-    it('distinguishes a failed fetch from a valid history with no matching records', async () => {
-      netFetchMock.mockRejectedValueOnce(new Error('offline'))
-      await expect(appUpdater.getUpgradeReleaseNotes('2.0.0')).resolves.toMatchObject({
-        historyStatus: 'unavailable',
-        releases: []
-      })
-      netFetchMock.mockResolvedValueOnce(new Response(JSON.stringify([{ version: '1.0.0', releaseNotes: notes }])))
-      await expect(appUpdater.getUpgradeReleaseNotes('2.0.0')).resolves.toMatchObject({
-        historyStatus: 'available',
-        releases: []
-      })
-    })
+    it('returns no remote release notes and makes no request', async () => {
+      await expect(appUpdater.getReleaseHistory()).resolves.toBeNull()
+      await expect(appUpdater.getLatestReleaseNotes()).resolves.toBeNull()
 
-    it.each(['1.0.0', '0.9.0', 'invalid', '2.0.0-rc.1'])(
-      'rejects unsupported target %s before fetching history',
-      async (target) => {
-        await expect(appUpdater.getUpgradeReleaseNotes(target)).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
-        expect(netFetchMock).not.toHaveBeenCalled()
-      }
-    )
-  })
-
-  describe('read-only update query', () => {
-    it('reports an available release without using the application updater or analytics', async () => {
-      releaseNotesCheckMock.mockResolvedValue({ isUpdateAvailable: true, updateInfo: { version: '2.0.0' } })
-      await expect(appUpdater.queryUpdateAvailability()).resolves.toEqual({
-        status: 'available',
-        currentVersion: '1.0.0',
-        version: '2.0.0'
-      })
-      expect(releaseNotesUpdaterInstances[0]).toMatchObject({ autoDownload: false, autoInstallOnAppQuit: false })
-      expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled()
-      expect(autoUpdater.downloadUpdate).not.toHaveBeenCalled()
-      expect(trackAppUpdateMock).not.toHaveBeenCalled()
-    })
-
-    it('does not turn a failed or unsupported updater query into an up-to-date result', async () => {
-      releaseNotesCheckMock.mockRejectedValueOnce(new Error('HTTP 503'))
-      await expect(appUpdater.queryUpdateAvailability()).rejects.toThrow('HTTP 503')
-      releaseNotesCheckMock.mockResolvedValueOnce(null)
-      await expect(appUpdater.queryUpdateAvailability()).rejects.toThrow('did not produce a result')
+      expect(netFetchMock).not.toHaveBeenCalled()
+      expect(releaseNotesCheckMock).not.toHaveBeenCalled()
     })
   })
 
@@ -273,26 +224,6 @@ describe('AppUpdaterService', () => {
         'X-Region': 'global'
       })
       expect(autoUpdater.requestHeaders).not.toHaveProperty('X-Desktop-Update-Bridge')
-    })
-
-    it('checks the marked CN stable feed and preserves the preview preference', async () => {
-      appEditionState.current = 'cn'
-      appEditionState.bridge = true
-      MockMainPreferenceServiceUtils.setPreferenceValue('app.dist.test_plan.enabled', true)
-      MockMainPreferenceServiceUtils.setPreferenceValue('app.dist.test_plan.channel', UpgradeChannel.BETA)
-      try {
-        await appUpdater.checkForUpdates()
-        expect(autoUpdater.checkForUpdates).toHaveBeenCalledOnce()
-        expect(autoUpdater.channel).toBe('latest-cn')
-        expect(autoUpdater.requestHeaders).toMatchObject({
-          'X-Edition': 'cn',
-          'X-Desktop-Update-Bridge': 'cn-macos'
-        })
-      } finally {
-        appEditionState.bridge = false
-      }
-      await (appUpdater as any).configureUpdaterForCheck()
-      expect(autoUpdater.channel).toBe('beta-cn')
     })
 
     it('keeps existing updater request headers', async () => {
@@ -342,86 +273,6 @@ describe('AppUpdaterService', () => {
       await (appUpdater as any).configureUpdaterForCheck()
 
       expect(autoUpdater.channel).toBe(UpgradeChannel.BETA)
-    })
-
-    it('applies the channel and request headers before checking for updates', async () => {
-      vi.mocked(autoUpdater.checkForUpdates).mockImplementation(async () => {
-        expect(autoUpdater.channel).toBe(UpgradeChannel.LATEST)
-        expect(autoUpdater.requestHeaders).toMatchObject({
-          'App-Version': 'v1.0.0',
-          'X-Edition': 'global',
-          'X-Region': 'global'
-        })
-        return null
-      })
-
-      await appUpdater.checkForUpdates()
-
-      expect(autoUpdater.checkForUpdates).toHaveBeenCalledOnce()
-    })
-
-    it('fetches and validates release history through the managed release service', async () => {
-      vi.mocked(regionService.getCountry).mockResolvedValue('CN')
-      const releaseNotes = '<!--LANG:en-->Remote notes<!--LANG:zh-CN-->远端说明<!--LANG:END-->'
-      const history = [{ releaseNotes, version: '1.1.0' }]
-      netFetchMock.mockResolvedValue(new Response(JSON.stringify(history)))
-
-      await expect(appUpdater.getReleaseHistory()).resolves.toEqual(history)
-
-      expect(net.fetch).toHaveBeenCalledWith(
-        'https://releases.cherry-ai.com/release-history.json',
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'App-Version': 'v1.0.0',
-            'X-Edition': 'global',
-            'X-Region': 'cn'
-          }),
-          redirect: 'follow',
-          signal: expect.any(AbortSignal)
-        })
-      )
-    })
-
-    it('uses the China edition channel for the latest release notes request', async () => {
-      appEditionState.current = 'cn'
-      MockMainPreferenceServiceUtils.setPreferenceValue('app.dist.test_plan.enabled', true)
-      MockMainPreferenceServiceUtils.setPreferenceValue('app.dist.test_plan.channel', UpgradeChannel.RC)
-      releaseNotesCheckMock.mockResolvedValue(null)
-
-      await appUpdater.getLatestReleaseNotes()
-
-      expect(releaseNotesUpdaterInstances).toHaveLength(1)
-      expect(releaseNotesUpdaterInstances[0]).toMatchObject({
-        channel: 'rc-cn',
-        requestHeaders: expect.objectContaining({ 'X-Edition': 'cn' })
-      })
-    })
-
-    it('merges a newer channel release with stable release history', async () => {
-      const stableNotes = '<!--LANG:en-->Stable notes<!--LANG:zh-CN-->稳定版说明<!--LANG:END-->'
-      const rcNotes = '<!--LANG:en-->RC notes<!--LANG:zh-CN-->测试版说明<!--LANG:END-->'
-      netFetchMock.mockResolvedValue(new Response(JSON.stringify([{ releaseNotes: stableNotes, version: '1.1.0' }])))
-      releaseNotesCheckMock.mockResolvedValue({
-        isUpdateAvailable: true,
-        updateInfo: { releaseNotes: rcNotes, version: '1.2.0-rc.1' }
-      })
-
-      await expect(appUpdater.getReleaseHistory()).resolves.toEqual([
-        { releaseNotes: rcNotes, version: '1.2.0-rc.1' },
-        { releaseNotes: stableNotes, version: '1.1.0' }
-      ])
-    })
-
-    it('keeps newer updater notes when release history is unavailable', async () => {
-      netFetchMock.mockRejectedValue(new Error('offline'))
-      releaseNotesCheckMock.mockResolvedValue({
-        isUpdateAvailable: true,
-        updateInfo: { releaseNotes: 'New release notes', version: '1.1.0' }
-      })
-
-      await expect(appUpdater.getReleaseHistory()).resolves.toEqual([
-        { releaseNotes: 'New release notes', version: '1.1.0' }
-      ])
     })
 
     it('falls back to bundled history when the managed response is invalid', async () => {

@@ -73,4 +73,17 @@ describe('builtinToolPolicy', () => {
     }
     expect(findBuiltinToolPolicy('mcp__cherry-tools__config', WITHOUT_HOST_TOOLS)?.approval).toBe('auto')
   })
+
+  it('asks before an Agent searches the web, fetches a URL or queries the skill registries, unless Full Access lifts it', () => {
+    for (const runtimeName of [
+      'mcp__cherry-tools__web_search',
+      'mcp__cherry-tools__web_fetch',
+      'mcp__skills__search_skills'
+    ]) {
+      expect(findBuiltinToolPolicy(runtimeName, WITHOUT_HOST_TOOLS)).toMatchObject({
+        approval: 'required',
+        bypassApproval: 'lift'
+      })
+    }
+  })
 })

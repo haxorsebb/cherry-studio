@@ -6,16 +6,14 @@ import { ProfileSettings } from '../ProfileSettings'
 vi.mock('@renderer/components/UserProfileEditor', () => ({
   UserProfileEditor: () => <button type="button" aria-label="Avatar editor" />
 }))
-vi.mock('../SubscriptionSettings', () => ({
-  SubscriptionSettings: () => <div>Subscription and quota</div>
-}))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 
 describe('ProfileSettings', () => {
-  it('shows profile editing and subscription usage', () => {
+  // Privacy edition: the page is the local profile only; there is no subscription section.
+  it('shows profile editing without a subscription section', () => {
     render(<ProfileSettings />)
 
     expect(screen.getByRole('button', { name: 'Avatar editor' })).toBeInTheDocument()
-    expect(screen.getByText('Subscription and quota')).toBeInTheDocument()
+    expect(screen.queryByText(/subscription/i)).not.toBeInTheDocument()
   })
 })

@@ -69,6 +69,21 @@ it('blocks sending through preparation and download, shows progress, then restor
   expect(screen.getByRole('textbox')).toHaveValue('My draft edited')
 })
 
+// Privacy edition contract: opening a Claude Code composer must not fetch the runtime from
+// the npm registry; that only happens after the user clicks "Download".
+it('only reads the runtime status on open and downloads after an explicit click', async () => {
+  vi.mocked(window.api.ipcApi.request).mockResolvedValue({ ok: true, data: state('missing') })
+  const requestedRoutes = () => vi.mocked(window.api.ipcApi.request).mock.calls.map(([route]) => route)
+  render(<AgentComposerSlot {...props} />)
+
+  const download = await screen.findByRole('button', { name: /download|下载/i })
+  expect(requestedRoutes()).toEqual(['ai.claude_code.binary.status'])
+  expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled()
+
+  await userEvent.click(download)
+  expect(requestedRoutes()).toContain('ai.claude_code.binary.ensure')
+})
+
 it('never flashes the checking state when the runtime answers ready at once', async () => {
   vi.mocked(window.api.ipcApi.request).mockResolvedValue({ ok: true, data: state('ready') })
   render(<AgentComposerSlot {...props} />)

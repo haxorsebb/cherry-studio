@@ -37,6 +37,13 @@ const {
 
 // Native instrumentation is stubbed; Dedupe stays real so regressions still
 // exercise SDK event processors before beforeSend.
+// Privacy edition: the real gate always answers "no" (see privacyConsent.ts). These tests cover
+// the reporting code kept behind it, so they run against upstream's consent rule.
+vi.mock('@main/utils/privacyConsent', () => ({
+  isDataCollectionConsented: (enabled: boolean, policyVersion: string) =>
+    enabled && policyVersion === LATEST_PRIVACY_POLICY_VERSION
+}))
+
 vi.mock('@sentry/electron/main', () => {
   const stub = (name: string) => () => ({ name })
   return {

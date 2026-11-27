@@ -129,7 +129,7 @@ function AgentComposerSlot({
   return (
     <>
       {!isMultiSelectMode && binary.blocked && (
-        <ClaudeCodeDownloadStatus status={binary.status} onRetry={binary.retry} />
+        <ClaudeCodeDownloadStatus status={binary.status} onDownload={binary.download} onRetry={binary.retry} />
       )}
       <ConversationComposerSlot composerContext={context} fallback={!isMultiSelectMode && renderComposer()} />
     </>

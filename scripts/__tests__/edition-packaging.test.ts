@@ -75,24 +75,28 @@ describe('edition packaging', () => {
     expect(script).toContain(`--${arch}`)
   })
 
-  it('keeps the existing global product and update identity', () => {
+  // Privacy edition contract: an upstream merge must not bring back upstream's identity
+  // (the package would replace an upstream install and reuse its profile) or its update feed.
+  it('ships under its own identity and without an update feed', () => {
     const config = parse(readFileSync(path.join(projectRoot, 'electron-builder.yml'), 'utf8'))
 
     expect({
       appId: config.appId,
       edition: config.extraMetadata?.cherryEdition,
       nsisGuid: config.nsis.guid,
+      packagedName: config.extraMetadata?.name,
       productName: config.productName,
       protocol: config.protocols[0].schemes[0],
       publish: config.publish,
       windowsArtifactName: config.win.artifactName
     }).toEqual({
-      appId: 'com.kangfenmao.CherryStudio',
+      appId: 'io.github.haxorsebb.CherryStudioPE',
       edition: GLOBAL_EDITION,
-      nsisGuid: '41a4ccd8-bcc0-5710-9eee-0e164da68057',
-      productName: 'Cherry Studio',
+      nsisGuid: undefined,
+      packagedName: 'CherryStudioPE',
+      productName: 'Cherry Studio PE',
       protocol: 'cherrystudio',
-      publish: expect.objectContaining({ provider: 'generic', url: 'https://releases.cherry-ai.com' }),
+      publish: null,
       windowsArtifactName: '${productName}-${version}-${arch}-setup.${ext}'
     })
   })

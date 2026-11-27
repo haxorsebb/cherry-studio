@@ -1,4 +1,5 @@
-import { app, net, shell } from 'electron'
+import type { Net } from 'electron'
+import { app, shell } from 'electron'
 import type { infer as Infer, ZodType } from 'zod'
 
 import { application } from '@application'
@@ -56,6 +57,12 @@ import {
 import { createAuthorizationSecrets, createDeviceKeyPair, createDeviceSignature, createIdempotencyKey } from './crypto'
 import { getMachineCode } from './machineCode'
 import { trackCherryCloudAnalyticsEvent } from './subscriptionAnalytics'
+
+// Privacy edition: Cherry Cloud is offline. Every request in this service goes through this
+// stand-in for Electron's `net`, so nothing ever reaches the vendor's account servers.
+const net: Pick<Net, 'fetch'> = {
+  fetch: () => Promise.reject(new Error('Cherry Cloud is disabled in the privacy edition'))
+}
 
 const logger = loggerService.withContext('CherryCloudService')
 const PRODUCTION_API_ORIGINS = {

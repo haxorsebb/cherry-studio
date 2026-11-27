@@ -55,6 +55,10 @@ hostname resolves into `198.18.0.0/15` and passes. Both are accepted rather than
 the second would break the fallback for every fake-IP user. Literal private IPs and `localhost` are
 rejected on every setup.
 
+Privacy edition: Jina is no longer a fallback. `WEB_SEARCH_FALLBACK_PROVIDER_IDS_BY_CAPABILITY` keeps
+only the built-in `fetch` for URLs and nothing for keyword searches, so a failing provider is never
+rerouted to a third-party service. The guard above stays in the code but is currently unreachable.
+
 ## Why Not `net.fetch`
 
 Electron `net.fetch` uses Chromium's network stack and follows the app/session proxy configuration, but it does not expose a per-request DNS `lookup` hook. A preflight DNS check followed by `net.fetch(originalUrl)` is therefore still vulnerable to a DNS time-of-check/time-of-use gap.

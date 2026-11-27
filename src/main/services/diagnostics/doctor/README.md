@@ -96,7 +96,9 @@ its own global Doctor, preserving the contextual report.
 
 DoctorService resolves Agents through AgentService, captures the default model once per execution,
 and owns runs and report validity. Contextual DNS/TLS/proxy checks share the selected provider's
-endpoint diagnosis; global checks use the built-in endpoints. CacheService transports reports and
+endpoint diagnosis; global checks use the built-in endpoints. The Privacy edition has no built-in
+endpoints (`network/endpoints.ts`), and `includeByDefault: false` keeps the `network-endpoint-*` checks
+and `install-update-available` out of a run. CacheService transports reports and
 does not select their subject. Run metadata is retained with its run ID and expired scopes are
 pruned on subsequent runs. Fixes revalidate Agent existence and MCP membership before acting.
 MCP connection ownership and resource-level operation coordination remain with McpRuntimeService.

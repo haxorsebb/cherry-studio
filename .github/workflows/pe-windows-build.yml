@@ -1,0 +1,61 @@
+name: PE Windows Build
+run-name: PE Windows build from ${{ github.ref_name }}
+
+# Privacy edition (this fork). A Windows package needs a Windows host, and upstream's packaging
+# workflows only run in the upstream repository. This one builds unsigned x64 packages on request.
+on:
+  # The "Run workflow" button only appears once this file is on the default branch.
+  workflow_dispatch:
+  # From any other branch, push a tag: git tag pe-win-<name> <commit> && git push origin pe-win-<name>
+  push:
+    tags:
+      - "pe-win-*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Windows x64
+    runs-on: windows-2022
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: ".node-version"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      # No secrets are passed: nothing is signed, published or uploaded to a vendor.
+      - name: Build Windows
+        run: pnpm build:win:x64 --publish never
+        env:
+          ELECTRON_BUILDER_7Z_FILTER: BCJ
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*-x64-setup.exe
+          archive: false
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload portable build
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/*-x64-portable.exe
+          archive: false
+          if-no-files-found: error
+          retention-days: 7

@@ -35,7 +35,7 @@ const test = base.extend<{ notesProfile: NotesProfile }>({
       } catch (cause) {
         throw new Error('Set E2E_RIPGREP_BIN to an executable rg before running Notes smoke tests', { cause })
       }
-      const binaryDirectory = join(profile, '.cherrystudio', 'bin')
+      const binaryDirectory = join(profile, '.cherrystudio-pe', 'bin')
       mkdirSync(binaryDirectory, { recursive: true })
       const destination = join(binaryDirectory, process.platform === 'win32' ? 'rg.exe' : 'rg')
       copyFileSync(ripgrepSource, destination)

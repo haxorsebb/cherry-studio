@@ -50,12 +50,22 @@ describe('diagnosticsHandlers', () => {
     expect(serviceMocks.exportBundle).toHaveBeenCalledWith(input, 'main-window')
   })
 
-  it('returns the processing state fetched for a report', async () => {
-    serviceMocks.refreshReport.mockResolvedValue({ processingStatus: 'resolved' })
-    await expect(
-      diagnosticsHandlers['diagnostics.report.refresh']({ reportId: 'report-id' }, { senderId: 'main-window' })
-    ).resolves.toEqual({ processingStatus: 'resolved' })
-    expect(serviceMocks.refreshReport).toHaveBeenCalledWith('report-id')
+  it('refuses every route that would contact the vendor, without building or sending anything', async () => {
+    const caller = { senderId: 'main-window' }
+    const bundleId = '123e4567-e89b-42d3-a456-426614174000'
+    const upload = { description: 'It broke', includeLogs: true, includeTraces: true, range: '24h' as const }
+
+    await expect(diagnosticsHandlers['diagnostics.bundle.upload'](upload, caller)).rejects.toThrow(/disabled/)
+    await expect(diagnosticsHandlers['diagnostics.bundle.retry_upload']({ bundleId }, caller)).rejects.toThrow(
+      /disabled/
+    )
+    await expect(diagnosticsHandlers['diagnostics.report.refresh']({ reportId: 'report-id' }, caller)).rejects.toThrow(
+      /disabled/
+    )
+
+    expect(serviceMocks.uploadBundle).not.toHaveBeenCalled()
+    expect(serviceMocks.retryUpload).not.toHaveBeenCalled()
+    expect(serviceMocks.refreshReport).not.toHaveBeenCalled()
   })
 
   it('passes the trusted caller window id when saving a retained upload', async () => {

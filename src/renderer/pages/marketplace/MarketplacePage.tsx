@@ -1,5 +1,5 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
-import { Bot, Layers, Settings2, Sparkles } from 'lucide-react'
+import { Bot, Layers, Settings2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -22,13 +22,14 @@ import { RegistrySkillsCatalog } from './RegistrySkillsCatalog'
 import { SkillSubscriptionBar } from './SkillSubscriptionBar'
 import { useMarketplace } from './useMarketplace'
 
+// Privacy edition: only the catalogs bundled with the app are offered. The skill type is
+// gone because its catalog and registries are fetched from vendor servers.
 const RESOURCE_TYPES = [
   { id: 'all', label: 'common.all', icon: Layers },
-  { id: 'skill', label: 'marketplace.type.skill', icon: Sparkles },
   { id: 'agent', label: 'marketplace.type.agent', icon: Bot },
   { id: 'mcp', label: 'marketplace.type.mcp', icon: McpLogo }
 ] as const
-const OVERVIEW_TYPES = ['skill', 'agent', 'mcp'] as const
+const OVERVIEW_TYPES = ['agent', 'mcp'] as const
 const marketplaceRoute = getRouteApi('/app/marketplace')
 
 export default function MarketplacePage() {
@@ -46,7 +47,8 @@ export default function MarketplacePage() {
   })
   const [templateCategory, setTemplateCategory] = useState('')
   const [skillCategory, setSkillCategory] = useState('')
-  const moreMcpSources = mcpView === 'sources' || Boolean(mcpProvider)
+  // Privacy edition: the third-party MCP directories ("more sources") are never shown.
+  const moreMcpSources = false
   const selectResourceType = (type: MarketplaceView) => {
     setSelectedType(type)
     void navigate({
@@ -58,10 +60,8 @@ export default function MarketplacePage() {
   const query = queries[resourceType]
   const skillSourceId = resourceType === 'skill' ? sourceId : null
   const registrySource = skillSourceId === 'skills.sh' || skillSourceId === 'claude-plugins.dev' ? skillSourceId : null
-  const skills = useMarketplace(
-    registrySource ? null : skillSourceId,
-    !registrySource && (resourceType === 'all' || resourceType === 'skill')
-  )
+  // Inactive, so the remote skill catalog is never requested.
+  const skills = useMarketplace(registrySource ? null : skillSourceId, false)
   const agents = useAgentCatalogPresets({ enabled: resourceType === 'all' || resourceType === 'agent' })
   const skillCategories = useMemo(
     () => [...new Set((skills.catalog.data ?? []).map((skill) => skill.domain).filter(Boolean))],
@@ -93,7 +93,7 @@ export default function MarketplacePage() {
     mcp: mcp.presets.length,
     all: null
   }
-  const curatedCounts = [skills.curatedCount, counts.agent, counts.mcp]
+  const curatedCounts = [counts.agent, counts.mcp]
   if (curatedCounts.every((count) => count !== null))
     counts.all = curatedCounts.reduce<number>((sum, count) => sum + (count ?? 0), 0)
   const browse = (type: MarketplaceResourceType) => {
@@ -200,16 +200,6 @@ export default function MarketplacePage() {
                   void navigate({ to: '/app/marketplace', search: { mcpView: 'curated' }, replace: true })
                 }>
                 {t('marketplace.curated')}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className={'shrink-0 rounded-full ' + (moreMcpSources ? 'bg-accent' : '')}
-                aria-pressed={moreMcpSources}
-                onClick={() =>
-                  void navigate({ to: '/app/marketplace', search: { mcpView: 'sources' }, replace: true })
-                }>
-                {t('marketplace.more_sources')}
               </Button>
               <Button
                 size="sm"
