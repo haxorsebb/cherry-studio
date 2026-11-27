@@ -149,10 +149,13 @@ export const DOCTOR_CHECK_CATALOG = {
     details: ['mismatch'],
     requires: []
   },
+  // Privacy edition: updates and the vendor services are off, so this check and the four
+  // `network-endpoint-*` checks below are dead. `includeByDefault: false` keeps them out of a run.
   'install-update-available': {
     domain: 'install',
     tier: 'live',
     scope: 'global',
+    includeByDefault: false,
     fixes: [],
     details: ['available', 'unsupported'],
     requires: ['network-endpoint-update']
@@ -304,6 +307,7 @@ export const DOCTOR_CHECK_CATALOG = {
     domain: 'network',
     tier: 'live',
     scope: 'global',
+    includeByDefault: false,
     fixes: [],
     details: ENDPOINT_DETAILS,
     requires: ['network-online']
@@ -312,6 +316,7 @@ export const DOCTOR_CHECK_CATALOG = {
     domain: 'network',
     tier: 'live',
     scope: 'global',
+    includeByDefault: false,
     fixes: [],
     details: ENDPOINT_DETAILS,
     requires: ['network-online']
@@ -320,6 +325,7 @@ export const DOCTOR_CHECK_CATALOG = {
     domain: 'network',
     tier: 'live',
     scope: 'global',
+    includeByDefault: false,
     fixes: [],
     details: ENDPOINT_DETAILS,
     requires: ['network-online']
@@ -328,6 +334,7 @@ export const DOCTOR_CHECK_CATALOG = {
     domain: 'network',
     tier: 'live',
     scope: 'global',
+    includeByDefault: false,
     fixes: [],
     details: ENDPOINT_DETAILS,
     requires: ['network-online']

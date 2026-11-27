@@ -171,6 +171,27 @@ describe('DoctorService.run', () => {
     expect(state()).toEqual({ status: 'completed', report: previous.report })
   })
 
+  it('leaves the vendor endpoint probes and the update check out of a full system run', async () => {
+    // The registry mock implements only a few checks, so this run cannot finish. The running
+    // state it publishes first already names every selected check.
+    await createReadyService()
+      .run({ subject: { kind: 'global' }, tier: 'live' })
+      .catch(() => undefined)
+
+    const published = vi.mocked(application.get('CacheService').setShared).mock.calls.map(([, value]) => value)
+    const selected = (published[0] as { selectedCheckIds: readonly string[] }).selectedCheckIds
+    expect(selected).toContain('network-provider-endpoint')
+    for (const id of [
+      'network-endpoint-update',
+      'network-endpoint-registry',
+      'network-endpoint-cloud',
+      'network-endpoint-diagnostics',
+      'install-update-available'
+    ]) {
+      expect(selected).not.toContain(id)
+    }
+  })
+
   it('rejects early calls without publishing a running state', async () => {
     await expect(
       new DoctorService().run({ subject: { kind: 'global' }, tier: 'quick', checkIds: MOCKED })
